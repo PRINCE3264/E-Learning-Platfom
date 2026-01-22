@@ -1,4 +1,4 @@
-.sidebar {
+  .sidebar {
   width: 200px;
   height: 100%;
   left: 0;
@@ -43,8 +43,132 @@
   }
 }
 
+
 .dashboard-admin {
   display: flex;
   min-height: 80vh;
   margin-top: 20px;
+}
+
+
+ .users {
+  flex: 1;                      
+  display: flex;
+  flex-direction: column;
+  align-items: center;             
+  justify-content: flex-start;    
+  padding: 20px;
+}
+
+
+.users-table {
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 2000px;
+  text-align: center;
+} 
+
+
+
+
+.users-table th,
+.users-table td {
+  border: 1px solid gray;
+  padding: 10px 15px;
+  align-items: center;
+}
+  
+
+ /* Add these to your existing common.css */
+
+/* Loading State */
+.sidebar-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 20px;
+  padding: 40px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.sidebar-loading p {
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+/* No User Message */
+.no-user-message {
+  padding: 40px 25px;
+  text-align: center;
+}
+
+.no-user-message p {
+  color: #94a3b8;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.login-btn {
+  display: inline-block;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* Fix for logout button */
+.logout-item button {
+  width: 100%;
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px 20px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+/* Ensure sidebar always shows */
+.sidebar {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Animation for user info */
+.user-info {
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

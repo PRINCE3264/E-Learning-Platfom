@@ -1,28 +1,113 @@
 .profile {
-  background-color: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-  width: 30%;
-  margin: 185px auto;
+  background-color: #ffffff;
+  padding: 25px;
+  border-radius: 14px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+  width: 32%;
+  margin: 160px auto;
+  transition: all 0.3s ease;
+  position: relative;
 
-  @media (max-width: 768px) {
-    padding: 10px;
-    width: 80%;
-    margin: 90px auto;
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 25px 45px rgba(0, 0, 0, 0.18);
   }
 
+  /* ===== Profile Header ===== */
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #222;
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  /* ===== Avatar ===== */
+  .profile-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8a4baf, #5e17eb);
+    color: #fff;
+    font-size: 34px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px auto;
+    box-shadow: 0 8px 18px rgba(138, 75, 175, 0.4);
+  }
+
+  /* ===== Profile Info ===== */
   .profile-info {
     text-align: left;
-    margin-top: 15px;
+    margin-top: 20px;
+    text-align: center;
 
     p {
-      margin-bottom: 10px;
-      color: #333;
+      margin-bottom: 12px;
+      color: #444;
+      font-size: 15px;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 6px;
 
       strong {
         color: #8a4baf;
+        font-weight: 600;
       }
+    }
+  }
+
+  /* ===== Buttons ===== */
+  .common-btn {
+    width: 100%;
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    background: linear-gradient(135deg, #8a4baf, #5e17eb);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: linear-gradient(135deg, #5e17eb, #8a4baf);
+      transform: scale(1.03);
+    }
+
+    &.logout {
+      background: linear-gradient(135deg, #ff416c, #ff4b2b);
+    }
+
+    &.admin {
+      background: linear-gradient(135deg, #f7971e, #ffd200);
+      color: #222;
+    }
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 768px) {
+    width: 85%;
+    padding: 18px;
+    margin: 90px auto;
+
+    h2 {
+      font-size: 22px;
+    }
+
+    .profile-avatar {
+      width: 75px;
+      height: 75px;
+      font-size: 28px;
     }
   }
 }

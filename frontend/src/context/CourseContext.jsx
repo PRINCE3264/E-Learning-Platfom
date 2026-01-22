@@ -1,60 +1,103 @@
+
 import axios from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
 import { server } from "../main";
 
+// ================= CONTEXT =================
 const CourseContext = createContext();
 
+// ================= PROVIDER =================
 export const CourseContextProvider = ({ children }) => {
   const [courses, setCourses] = useState([]);
-  const [course, setCourse] = useState([]);
-  const [mycourse, setMyCourse] = useState([]);
+  const [course, setCourse] = useState(null);
+  const [myCourses, setMyCourses] = useState([]);
 
-  async function fetchCourses() {
+  const [loading, setLoading] = useState({
+    courses: false,
+    course: false,
+    myCourses: false,
+  });
+
+  // ================= FETCH ALL COURSES =================
+  const fetchCourses = async () => {
     try {
+      setLoading((prev) => ({ ...prev, courses: true }));
+
       const { data } = await axios.get(`${server}/api/course/all`);
-
-      setCourses(data.courses);
+      setCourses(data?.courses || []);
     } catch (error) {
-      console.log(error);
+      console.error("❌ fetchCourses error:", error.message);
+      setCourses([]);
+    } finally {
+      setLoading((prev) => ({ ...prev, courses: false }));
     }
-  }
+  };
 
-  async function fetchCourse(id) {
+  // ================= FETCH SINGLE COURSE =================
+  const fetchCourse = async (id) => {
     try {
+      setLoading((prev) => ({ ...prev, course: true }));
+
       const { data } = await axios.get(`${server}/api/course/${id}`);
-      setCourse(data.course);
+      setCourse(data?.course || null);
     } catch (error) {
-      console.log(error);
+      console.error("❌ fetchCourse error:", error.message);
+      setCourse(null);
+    } finally {
+      setLoading((prev) => ({ ...prev, course: false }));
     }
-  }
+  };
 
-  async function fetchMyCourse() {
+  // ================= FETCH MY COURSES =================
+  const fetchMyCourses = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setMyCourses([]);
+      return;
+    }
+
     try {
+      setLoading((prev) => ({ ...prev, myCourses: true }));
+
       const { data } = await axios.get(`${server}/api/mycourse`, {
         headers: {
-          token: localStorage.getItem("token"),
+          Authorization: `Bearer ${token}`,
         },
       });
 
-      setMyCourse(data.courses);
+      setMyCourses(data?.courses || []);
     } catch (error) {
-      console.log(error);
-    }
-  }
+      console.error("❌ fetchMyCourses error:", error.message);
 
+      if (error.response?.status === 401) {
+        localStorage.removeItem("token");
+      }
+
+      setMyCourses([]);
+    } finally {
+      setLoading((prev) => ({ ...prev, myCourses: false }));
+    }
+  };
+
+  // ================= INITIAL LOAD =================
   useEffect(() => {
     fetchCourses();
-    fetchMyCourse();
+
+    if (localStorage.getItem("token")) {
+      fetchMyCourses();
+    }
   }, []);
+
   return (
     <CourseContext.Provider
       value={{
         courses,
+        course,
+        myCourses,
+        loading,
         fetchCourses,
         fetchCourse,
-        course,
-        mycourse,
-        fetchMyCourse,
+        fetchMyCourses,
       }}
     >
       {children}
@@ -62,4 +105,5 @@ export const CourseContextProvider = ({ children }) => {
   );
 };
 
+// ================= HOOK =================
 export const CourseData = () => useContext(CourseContext);

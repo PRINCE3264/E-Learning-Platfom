@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+
+
+import React, { useState, useEffect } from "react";
 import Layout from "../Utils/Layout";
 import { useNavigate } from "react-router-dom";
 import { CourseData } from "../../context/CourseContext";
@@ -19,7 +21,13 @@ const categories = [
 const AdminCourses = ({ user }) => {
   const navigate = useNavigate();
 
-  if (user && user.role !== "admin") return navigate("/");
+  const { courses, fetchCourses } = CourseData();
+
+  // Redirect non-admin users
+  useEffect(() => {
+    if (!user) return navigate("/login");
+    if (user.role !== "admin") return navigate("/");
+  }, [user, navigate]);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -31,10 +39,12 @@ const AdminCourses = ({ user }) => {
   const [imagePrev, setImagePrev] = useState("");
   const [btnLoading, setBtnLoading] = useState(false);
 
+  // Image preview handler
   const changeImageHandler = (e) => {
     const file = e.target.files[0];
-    const reader = new FileReader();
+    if (!file) return;
 
+    const reader = new FileReader();
     reader.readAsDataURL(file);
 
     reader.onloadend = () => {
@@ -43,14 +53,17 @@ const AdminCourses = ({ user }) => {
     };
   };
 
-  const { courses, fetchCourses } = CourseData();
-
+  // Form submit handler
   const submitHandler = async (e) => {
     e.preventDefault();
+
+    if (!title || !description || !category || !price || !createdBy || !duration || !image) {
+      return toast.error("Please fill all fields");
+    }
+
     setBtnLoading(true);
 
     const myForm = new FormData();
-
     myForm.append("title", title);
     myForm.append("description", description);
     myForm.append("category", category);
@@ -62,48 +75,56 @@ const AdminCourses = ({ user }) => {
     try {
       const { data } = await axios.post(`${server}/api/course/new`, myForm, {
         headers: {
-          token: localStorage.getItem("token"),
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
 
       toast.success(data.message);
-      setBtnLoading(false);
+
+      // Refresh course list
       await fetchCourses();
-      setImage("");
+
+      // Reset form
       setTitle("");
       setDescription("");
-      setDuration("");
-      setImagePrev("");
-      setCreatedBy("");
-      setPrice("");
       setCategory("");
+      setPrice("");
+      setCreatedBy("");
+      setDuration("");
+      setImage("");
+      setImagePrev("");
+      setBtnLoading(false);
     } catch (error) {
-      toast.error(error.response.data.message);
+      console.error(error);
+      toast.error(
+        error.response?.data?.message || "Something went wrong. Try again."
+      );
+      setBtnLoading(false);
     }
   };
 
   return (
     <Layout>
       <div className="admin-courses">
+        {/* Left: All Courses */}
         <div className="left">
           <h1>All Courses</h1>
           <div className="dashboard-content">
             {courses && courses.length > 0 ? (
-              courses.map((e) => {
-                return <CourseCard key={e._id} course={e} />;
-              })
+              courses.map((e) => <CourseCard key={e._id} course={e} />)
             ) : (
               <p>No Courses Yet</p>
             )}
           </div>
         </div>
 
+        {/* Right: Add Course Form */}
         <div className="right">
           <div className="add-course">
             <div className="course-form">
               <h2>Add Course</h2>
               <form onSubmit={submitHandler}>
-                <label htmlFor="text">Title</label>
+                <label>Title</label>
                 <input
                   type="text"
                   value={title}
@@ -111,7 +132,7 @@ const AdminCourses = ({ user }) => {
                   required
                 />
 
-                <label htmlFor="text">Description</label>
+                <label>Description</label>
                 <input
                   type="text"
                   value={description}
@@ -119,7 +140,7 @@ const AdminCourses = ({ user }) => {
                   required
                 />
 
-                <label htmlFor="text">Price</label>
+                <label>Price</label>
                 <input
                   type="number"
                   value={price}
@@ -127,7 +148,7 @@ const AdminCourses = ({ user }) => {
                   required
                 />
 
-                <label htmlFor="text">createdBy</label>
+                <label>Created By</label>
                 <input
                   type="text"
                   value={createdBy}
@@ -135,19 +156,21 @@ const AdminCourses = ({ user }) => {
                   required
                 />
 
+                <label>Category</label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
+                  required
                 >
-                  <option value={""}>Select Category</option>
-                  {categories.map((e) => (
-                    <option value={e} key={e}>
-                      {e}
+                  <option value="">Select Category</option>
+                  {categories.map((cat) => (
+                    <option value={cat} key={cat}>
+                      {cat}
                     </option>
                   ))}
                 </select>
 
-                <label htmlFor="text">Duration</label>
+                <label>Duration (hours)</label>
                 <input
                   type="number"
                   value={duration}
@@ -155,15 +178,12 @@ const AdminCourses = ({ user }) => {
                   required
                 />
 
-                <input type="file" required onChange={changeImageHandler} />
-                {imagePrev && <img src={imagePrev} alt="" width={300} />}
+                <label>Course Image</label>
+                <input type="file" accept="image/*" onChange={changeImageHandler} required />
+                {imagePrev && <img src={imagePrev} alt="Preview" width={300} />}
 
-                <button
-                  type="submit"
-                  disabled={btnLoading}
-                  className="common-btn"
-                >
-                  {btnLoading ? "Please Wait..." : "Add"}
+                <button type="submit" disabled={btnLoading} className="common-btn">
+                  {btnLoading ? "Please Wait..." : "Add Course"}
                 </button>
               </form>
             </div>
@@ -175,3 +195,4 @@ const AdminCourses = ({ user }) => {
 };
 
 export default AdminCourses;
+

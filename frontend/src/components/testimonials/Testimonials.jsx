@@ -5,55 +5,56 @@ const Testimonials = () => {
   const testimonialsData = [
     {
       id: 1,
-      name: "John Doe",
-      position: "Student",
+      name: "PRINCE VIDYARTHI",
+      position: "Full Stack Web Development Student",
       message:
-        "This platform helped me learn so effectively. The courses are amazing and the instructors are top-notch.",
-      image:
-        "https://th.bing.com/th?q=Current+Bachelor&w=120&h=120&c=1&rs=1&qlt=90&cb=1&dpr=1.3&pid=InlineBlock&mkt=en-IN&cc=IN&setlang=en&adlt=moderate&t=1&mw=247",
+        "This platform helped me gain real-world skills. The courses are well structured and easy to follow.",
+     // image: "https://randomuser.me/api/portraits/men/32.jpg",
+      image:"images/IMG-20241224-WA0130.jpg"
     },
+
     {
       id: 2,
-      name: "Jane Smith",
-      position: "Student",
+      name: "Jyoti Chaubey",
+      position: "Flutter App Developer",
       message:
-        "I've learned more here than in any other place. The interactive lessons and quizzes make learning enjoyable.",
-      image:
-        "https://th.bing.com/th/id/OIP.GKAiW3oc2TWXVEeZAzrWOAHaJF?w=135&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7",
+        "The instructors explain concepts clearly. I feel confident applying for jobs now.",
+      image: "images/1000107628.jpg",
     },
     {
       id: 3,
-      name: "John Doe",
-      position: "Student",
+      name: "Rahul Kumar",
+      position: "Full Stack .Net Java Devloper",
       message:
-        "This platform helped me learn so effectively. The courses are amazing and the instructors are top-notch.",
-      image:
-        "https://th.bing.com/th?q=Current+Bachelor&w=120&h=120&c=1&rs=1&qlt=90&cb=1&dpr=1.3&pid=InlineBlock&mkt=en-IN&cc=IN&setlang=en&adlt=moderate&t=1&mw=247",
-    },
-    {
-      id: 4,
-      name: "Jane Smith",
-      position: "Student",
-      message:
-        "I've learned more here than in any other place. The interactive lessons and quizzes make learning enjoyable.",
-      image:
-        "https://th.bing.com/th/id/OIP.GKAiW3oc2TWXVEeZAzrWOAHaJF?w=135&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7",
+        "Hands-on projects and lifetime access make this platform truly valuable.",
+      image: "https://randomuser.me/api/portraits/men/65.jpg",
     },
   ];
+
   return (
     <section className="testimonials">
-      <h2>What our students say</h2>
-      <div className="testmonials-cards">
-        {testimonialsData.map((e) => (
-          <div className="testimonial-card" key={e.id}>
-            <div className="student-image">
-              <img src={e.image} alt="" />
+      {/* ===== HEADER ===== */}
+      <h2 className="title">What Our Students Say</h2>
+      <p className="subtitle">
+        Real feedback from learners who transformed their careers
+      </p>
+
+      {/* ===== CARDS ===== */}
+      <div className="testimonial-cards">
+        {testimonialsData.map((t, index) => (
+          <div
+            className="testimonial-card"
+            key={t.id}
+            style={{ animationDelay: `${index * 0.15}s` }}
+          >
+            <div className="avatar">
+              <img src={t.image} alt={t.name} />
             </div>
-            <p className="message">{e.message}</p>
-            <div className="info">
-              <p className="name">{e.name}</p>
-              <p className="position">{e.position}</p>
-            </div>
+
+            <p className="message">“{t.message}”</p>
+
+            <h4>{t.name}</h4>
+            <span>{t.position}</span>
           </div>
         ))}
       </div>

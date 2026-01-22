@@ -1,4 +1,4 @@
-.courses {
+/* .courses {
   padding: 80px 0;
   text-align: center;
   min-height: 60vh;
@@ -14,5 +14,87 @@
     flex-wrap: wrap;
     justify-content: center;
     gap: 30px;
+  }
+} */
+
+
+/* ===== PAGE ===== */
+.courses-page {
+  padding: 50px 40px;
+  background: linear-gradient(135deg, #f7f4ff, #ffffff);
+  min-height: 100vh;
+}
+
+/* ===== HEADER ===== */
+.courses-header {
+  max-width: 1200px;
+  margin: auto;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.courses-header h1 {
+  font-size: 40px;
+  color: #2c2c54;
+}
+
+.courses-header p {
+  color: #666;
+  font-size: 17px;
+  margin: 10px 0 20px;
+}
+
+.courses-header input {
+  width: 100%;
+  max-width: 420px;
+  padding: 14px 18px;
+  border-radius: 50px;
+  border: 1px solid #ddd;
+  font-size: 15px;
+  outline: none;
+}
+
+/* ===== GRID ===== */
+.course-container {
+  max-width: 1200px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+}
+
+/* ===== LOADING ===== */
+.loading-text {
+  text-align: center;
+  margin-top: 100px;
+  font-size: 20px;
+  color: #6a1b9a;
+}
+
+/* ===== EMPTY ===== */
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.empty-state h3 {
+  font-size: 26px;
+  color: #444;
+}
+
+.empty-state p {
+  color: #777;
+  margin-top: 10px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .courses-page {
+    padding: 30px 20px;
+  }
+
+  .courses-header h1 {
+    font-size: 28px;
   }
 }

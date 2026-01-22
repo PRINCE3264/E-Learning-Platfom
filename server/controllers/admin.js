@@ -1,3 +1,7 @@
+
+
+
+// adminController.js
 import TryCatch from "../middlewares/TryCatch.js";
 import { Courses } from "../models/Courses.js";
 import { Lecture } from "../models/Lecture.js";
@@ -6,9 +10,13 @@ import { promisify } from "util";
 import fs from "fs";
 import { User } from "../models/User.js";
 
+const unlinkAsync = promisify(fs.unlink);
+
+// ==========================
+// Courses Management
+// ==========================
 export const createCourse = TryCatch(async (req, res) => {
   const { title, description, category, createdBy, duration, price } = req.body;
-
   const image = req.file;
 
   await Courses.create({
@@ -21,21 +29,15 @@ export const createCourse = TryCatch(async (req, res) => {
     price,
   });
 
-  res.status(201).json({
-    message: "Course Created Successfully",
-  });
+  res.status(201).json({ message: "Course Created Successfully" });
 });
 
 export const addLectures = TryCatch(async (req, res) => {
   const course = await Courses.findById(req.params.id);
-
   if (!course)
-    return res.status(404).json({
-      message: "No Course with this id",
-    });
+    return res.status(404).json({ message: "No Course with this ID" });
 
   const { title, description } = req.body;
-
   const file = req.file;
 
   const lecture = await Lecture.create({
@@ -45,99 +47,80 @@ export const addLectures = TryCatch(async (req, res) => {
     course: course._id,
   });
 
-  res.status(201).json({
-    message: "Lecture Added",
-    lecture,
-  });
+  res.status(201).json({ message: "Lecture Added", lecture });
 });
 
 export const deleteLecture = TryCatch(async (req, res) => {
   const lecture = await Lecture.findById(req.params.id);
+  if (!lecture) return res.status(404).json({ message: "Lecture not found" });
 
-  rm(lecture.video, () => {
-    console.log("Video deleted");
-  });
-
+  if (lecture.video) rm(lecture.video, () => console.log("Video deleted"));
   await lecture.deleteOne();
 
   res.json({ message: "Lecture Deleted" });
 });
 
-const unlinkAsync = promisify(fs.unlink);
-
 export const deleteCourse = TryCatch(async (req, res) => {
   const course = await Courses.findById(req.params.id);
+  if (!course) return res.status(404).json({ message: "Course not found" });
 
   const lectures = await Lecture.find({ course: course._id });
-
   await Promise.all(
     lectures.map(async (lecture) => {
-      await unlinkAsync(lecture.video);
-      console.log("video deleted");
+      if (lecture.video) await unlinkAsync(lecture.video);
+      console.log("Video deleted");
     })
   );
 
-  rm(course.image, () => {
-    console.log("image deleted");
-  });
+  if (course.image) rm(course.image, () => console.log("Image deleted"));
 
-  await Lecture.find({ course: req.params.id }).deleteMany();
-
+  await Lecture.deleteMany({ course: req.params.id });
   await course.deleteOne();
-
   await User.updateMany({}, { $pull: { subscription: req.params.id } });
 
-  res.json({
-    message: "Course Deleted",
-  });
+  res.json({ message: "Course Deleted" });
 });
 
+// ==========================
+// Stats
+// ==========================
 export const getAllStats = TryCatch(async (req, res) => {
-  const totalCoures = (await Courses.find()).length;
-  const totalLectures = (await Lecture.find()).length;
-  const totalUsers = (await User.find()).length;
+  const totalCourses = await Courses.countDocuments();
+  const totalLectures = await Lecture.countDocuments();
+  const totalUsers = await User.countDocuments();
 
-  const stats = {
-    totalCoures,
-    totalLectures,
-    totalUsers,
-  };
-
-  res.json({
-    stats,
-  });
+  res.json({ stats: { totalCourses, totalLectures, totalUsers } });
 });
 
+// ==========================
+// User Management
+// ==========================
 export const getAllUser = TryCatch(async (req, res) => {
-  const users = await User.find({ _id: { $ne: req.user._id } }).select(
-    "-password"
-  );
-
+  const users = await User.find({ _id: { $ne: req.user._id } }).select("-password");
   res.json({ users });
 });
 
 export const updateRole = TryCatch(async (req, res) => {
-  if (req.user.mainrole !== "superadmin")
-    return res.status(403).json({
-      message: "This endpoint is assign to superadmin",
-    });
-  const user = await User.findById(req.params.id);
+  // ✅ Fix: trim and lowercase mainrole
+  const userRole = req.user.mainrole?.trim().toLowerCase();
+  if (userRole !== "superadmin")
+    return res.status(403).json({ message: "This endpoint is restricted to superadmin" });
 
+  const user = await User.findById(req.params.id);
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  // Toggle user role
   if (user.role === "user") {
     user.role = "admin";
     await user.save();
-
-    return res.status(200).json({
-      message: "Role updated to admin",
-    });
+    return res.status(200).json({ message: "Role updated to admin" });
   }
 
   if (user.role === "admin") {
     user.role = "user";
     await user.save();
-
-    return res.status(200).json({
-      message: "Role updated",
-    });
+    return res.status(200).json({ message: "Role updated to user" });
   }
+
+  res.status(400).json({ message: "Cannot update this user's role" });
 });

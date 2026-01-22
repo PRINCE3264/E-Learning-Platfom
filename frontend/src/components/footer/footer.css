@@ -1,4 +1,4 @@
-footer {
+  /* footer {
   background-color: #8a5baf;
   color: white;
   padding: 20px 0;
@@ -34,5 +34,135 @@ footer {
         }
       }
     }
+  }
+} 
+
+   */
+
+
+
+
+
+   /* FOOTER WRAPPER */
+.footer {
+  background-color: #8a5baf; /* ✅ SAME BG COLOR */
+  color: #ffffff;
+  padding: 60px 40px 20px;
+}
+
+/* GRID */
+.footer-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 40px;
+}
+
+/* LOGO */
+.footer-logo {
+  font-size: 1.8rem;
+  color: #ffffff;
+  margin-bottom: 10px;
+}
+
+/* HEADINGS */
+.footer-box h3 {
+  color: #f3e8ff;
+  margin-bottom: 14px;
+}
+
+/* TEXT */
+.footer-box p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #f5f3ff;
+}
+
+/* LINKS */
+.footer-box ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-box ul li {
+  margin-bottom: 10px;
+}
+
+.footer-box ul li a {
+  text-decoration: none;
+  color: #ede9fe;
+  transition: 0.3s ease;
+}
+
+.footer-box ul li a:hover {
+  color: #ffffff;
+  padding-left: 6px;
+}
+
+/* NEWSLETTER */
+.newsletter {
+  display: flex;
+  margin-top: 12px;
+}
+
+.newsletter input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px 0 0 6px;
+  border: none;
+  outline: none;
+}
+
+.newsletter button {
+  padding: 0 16px;
+  background: #ffffff;
+  border: none;
+  color: #8a5baf;
+  font-size: 1.3rem;
+  border-radius: 0 6px 6px 0;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.newsletter button:hover {
+  background: #ede9fe;
+}
+
+/* SOCIAL ICONS */
+.social-links {
+  display: flex;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.social-links a {
+  font-size: 1.8rem;
+  color: #ede9fe;
+  transition: 0.3s ease;
+}
+
+.social-links a:hover {
+  color: #ffffff;
+  transform: translateY(-4px);
+}
+
+/* FOOTER BOTTOM */
+.footer-bottom {
+  margin-top: 30px;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  padding-top: 15px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #f5f3ff;
+}
+
+.footer-bottom span {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .footer {
+    padding: 40px 20px;
   }
 }

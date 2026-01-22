@@ -1,4 +1,4 @@
-.course-description {
+/* .course-description {
   padding: 80px 0;
   text-align: center;
   min-height: 55vh;
@@ -40,5 +40,157 @@
       max-width: 800px;
       margin: 0 auto;
     }
+  }
+} */
+
+
+
+
+
+.course-description {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 35px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.08);
+  animation: fadeUp 0.6s ease;
+}
+
+/* HEADER */
+.course-header {
+  display: flex;
+  gap: 35px;
+  flex-wrap: wrap;
+}
+
+.course-images {
+  width: 360px;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(138, 75, 175, 0.25);
+  transition: transform 0.4s ease;
+}
+
+.course-images:hover {
+  transform: scale(1.05);
+}
+
+/* INFO */
+.course-info h2 {
+  font-size: 34px;
+  color: #2c2c54;
+}
+
+.course-meta {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  font-size: 15px;
+  color: #666;
+}
+
+.course-rating {
+  font-size: 18px;
+  color: #f39c12;
+  margin: 10px 0;
+}
+
+/* PRICE */
+.price-box {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.price {
+  font-size: 28px;
+  font-weight: 700;
+  color: #6a1b9a;
+}
+
+.discount {
+  background: #ffebee;
+  color: #c62828;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+}
+
+/* STATS */
+.course-stats {
+  margin: 30px 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+.course-stats div {
+  padding: 18px;
+  text-align: center;
+  border-radius: 14px;
+  background: #faf7ff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* DESC */
+.course-desc {
+  font-size: 17px;
+  line-height: 1.7;
+  color: #444;
+}
+
+/* BUTTON */
+.common-btn {
+  margin-top: 25px;
+  padding: 14px 36px;
+  border-radius: 50px;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #8a4baf, #6a1b9a);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 14px 35px rgba(138, 75, 175, 0.4);
+  transition: all 0.35s ease;
+}
+
+.common-btn:hover {
+  transform: translateY(-4px);
+}
+
+/* STICKY CTA */
+.sticky-btn {
+  position: sticky;
+  bottom: 20px;
+  width: 100%;
+}
+
+/* ANIMATION */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .course-header {
+    flex-direction: column;
+  }
+
+  .course-images {
+    width: 100%;
+    height: auto;
+  }
+
+  .course-info h2 {
+    font-size: 26px;
   }
 }

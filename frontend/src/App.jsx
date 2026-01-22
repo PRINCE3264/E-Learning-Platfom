@@ -1,3 +1,4 @@
+
 import React from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -14,7 +15,7 @@ import Loading from "./components/loading/Loading";
 import Courses from "./pages/courses/Courses";
 import CourseDescription from "./pages/coursedescription/CourseDescription";
 import PaymentSuccess from "./pages/paymentsuccess/PaymentSuccess";
-import Dashbord from "./pages/dashbord/Dashbord";
+import Dashbord from "./pages/dashbord/Dashbord"; 
 import CourseStudy from "./pages/coursestudy/CourseStudy";
 import Lecture from "./pages/lecture/Lecture";
 import AdminDashbord from "./admin/Dashboard/AdminDashbord";
@@ -22,9 +23,15 @@ import AdminCourses from "./admin/Courses/AdminCourses";
 import AdminUsers from "./admin/Users/AdminUsers";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
-
+import Quiz from "./pages/quiz/Quiz";
+import AdminQuiz from "./admin/Quiz/AdminQuiz";
+import Contact from "./pages/contact/Contact";
+import Sidebar from "./admin/Utils/Sidebar";
+import AdminInstructors from "./admin/Instructor/InstructorDashboard";
+import AdminAnalytics  from  "./admin/Analytics/AnalyticsPage";
 const App = () => {
   const { isAuth, user, loading } = UserData();
+
   return (
     <>
       {loading ? (
@@ -36,6 +43,9 @@ const App = () => {
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
             <Route path="/courses" element={<Courses />} />
+            <Route path="/quiz" element={<Quiz />} />
+             <Route path="/contact" element={<Contact />} />
+
             <Route
               path="/account"
               element={isAuth ? <Account user={user} /> : <Login />}
@@ -70,24 +80,36 @@ const App = () => {
               path="/course/study/:id"
               element={isAuth ? <CourseStudy user={user} /> : <Login />}
             />
-
             <Route
               path="/lectures/:id"
               element={isAuth ? <Lecture user={user} /> : <Login />}
             />
 
+            {/* ✅ fixed admin routes */}
             <Route
               path="/admin/dashboard"
               element={isAuth ? <AdminDashbord user={user} /> : <Login />}
             />
-
             <Route
               path="/admin/course"
               element={isAuth ? <AdminCourses user={user} /> : <Login />}
             />
             <Route
+              path="/admin/quiz"
+              element={isAuth ? <AdminQuiz user={user} /> : <Login />}
+            />
+             
+            <Route
               path="/admin/users"
               element={isAuth ? <AdminUsers user={user} /> : <Login />}
+            />
+             <Route
+              path="/admin/instructors"
+              element={isAuth ? <AdminInstructors user={user} /> : <Login />}
+            />
+             <Route
+              path="/admin/analytics"
+              element={isAuth ? <AdminAnalytics user={user} /> : <Login />}
             />
           </Routes>
           <Footer />
@@ -98,3 +120,4 @@ const App = () => {
 };
 
 export default App;
+

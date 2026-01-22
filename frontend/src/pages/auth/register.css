@@ -1,0 +1,243 @@
+/* ===== PAGE ===== */
+.auth-page {
+  min-height: 80vh;
+  /* background: linear-gradient(135deg, #6c4cff, #8e7bff); */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* ===== CONTAINER ===== */
+.auth-container {
+  width: 100%;
+  max-width: 440px;
+  padding: 20px;
+}
+
+/* ===== CARD ===== */
+.auth-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 35px 30px;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.2);
+  animation: fadeUp 0.6s ease;
+}
+
+/* ===== REGISTER HEADER ===== */
+.register-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.register-title {
+  font-size: 30px;
+  font-weight: 700;
+  color: #6c4cff;
+}
+
+.create-account-text {
+  margin-top: 6px;
+  font-size: 16px;
+  color: #666;
+}
+
+/* ===== FORM ===== */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+/* ===== INPUT ===== */
+.form-input {
+  width: 90%;
+  padding: 14px 44px 14px 14px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  transition: 0.3s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #6c4cff;
+  box-shadow: 0 0 0 3px rgba(108, 76, 255, 0.15);
+}
+
+/* ===== PASSWORD ===== */
+.password-input-container {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 18px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #666;
+}
+
+/* ===== PASSWORD STRENGTH ===== */
+.password-strength {
+  margin-top: 8px;
+}
+
+.strength-bar {
+  height: 6px;
+  background: #eee;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.strength-fill {
+  height: 100%;
+  width: 100%;
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: 0.4s ease;
+}
+
+.strength-fill.weak {
+  background: #e74c3c;
+  transform: scaleX(0.33);
+}
+
+.strength-fill.fair {
+  background: #f1c40f;
+  transform: scaleX(0.66);
+}
+
+.strength-fill.strong {
+  background: #2ecc71;
+  transform: scaleX(1);
+}
+
+.strength-text {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-top: 4px;
+  color: #555;
+}
+
+/* ===== TERMS ===== */
+.terms-checkbox {
+  display: flex;
+  gap: 8px;
+  font-size: 13px;
+  align-items: flex-start;
+  font-size: 16px;
+}
+
+.terms-checkbox a {
+  color: #6c4cff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.terms-checkbox a:hover {
+  text-decoration: underline;
+}
+
+/* ===== ERRORS ===== */
+.error-message {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #e63946;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* ===== BUTTON ===== */
+.submit-btn {
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #6c4cff, #8e7bff);
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px rgba(108, 76, 255, 0.4);
+}
+
+.submit-btn:disabled {
+  background: #aaa;
+  cursor: not-allowed;
+}
+
+/* ===== LOADING ===== */
+.btn-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ===== LOGIN LINK ===== */
+.login-link {
+  margin-top: 22px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.login-link a {
+  color: #6c4cff;
+  font-weight: 600;
+  margin-left: 5px;
+  text-decoration: none;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}
+
+/* ===== ANIMATION ===== */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
