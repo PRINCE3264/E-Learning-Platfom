@@ -6,23 +6,67 @@ An **E-Learning Platform** built using the **MERN Stack** that allows students t
 
 ## 🚀 Features
 
-### 👨‍🎓 Student
-- User registration & login
-- Browse and enroll in courses
-- Watch video lectures
-- Access study materials
-- Attempt quizzes & assessments
-- Track learning progress
+👨‍🎓 Student Panel
 
-### 👨‍🏫 Admin
-- Admin authentication
-- Add / Update / Delete courses
-- Upload videos & study materials
-- Manage users
-- Create quizzes & exams
-- Monitor student progress
+User registration & secure login
 
----
+Browse & enroll in available courses
+
+Watch video lectures anytime
+
+Download & access study materials
+
+Attempt quizzes & assessments
+
+Track learning progress in real time
+
+View performance reports & results
+
+👨‍🏫 Admin Panel
+
+Secure admin authentication
+
+Add, update & delete courses
+
+Upload video lectures & study materials
+
+Manage students & instructors
+
+Create quizzes, tests & exams
+
+Monitor student performance & progress
+
+View analytics & platform insights
+
+👨‍🏫 Instructor (Mentor)
+
+Create and manage courses
+
+Upload lectures & learning resources
+
+Track student engagement
+
+Evaluate quiz results
+
+Communicate with students
+
+📊 Analytics & Reports
+
+Student progress tracking
+
+Course performance insights
+
+Quiz & exam statistics
+
+Revenue & enrollment analytics
+
+👤 Profile Management
+
+Update personal information
+
+Change password
+
+Track enrolled courses
 
 ## 🛠 Tech Stack
 
@@ -83,3 +127,4 @@ PORT=5000
 MONGO_URI=your_mongodb_url
 JWT_SECRET=your_secret_key
 **
+
