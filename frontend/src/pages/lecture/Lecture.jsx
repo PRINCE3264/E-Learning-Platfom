@@ -10,6 +10,7 @@ import { server } from "../../main";
 import Loading from "../../components/loading/Loading";
 import toast from "react-hot-toast";
 import { TiTick } from "react-icons/ti";
+import CommentSection from "../../components/comment/CommentSection";
 
 const Lecture = ({ user }) => {
   const [lectures, setLectures] = useState([]);
@@ -28,6 +29,7 @@ const Lecture = ({ user }) => {
   const [completedLec, setCompletedLec] = useState(0);
   const [lectLength, setLectLength] = useState(0);
   const [progress, setProgress] = useState([]);
+  const [activeTab, setActiveTab] = useState("lectures");
 
   const token = localStorage.getItem("token");
 
@@ -165,6 +167,37 @@ const Lecture = ({ user }) => {
     fetchProgress();
   }, [params.id]);
 
+  // Time Tracking
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const updateTime = async () => {
+        try {
+          await axios.post(
+            `${server}/api/course/time-spent`,
+            {
+              courseId: params.id,
+              minutes: 1, // Add 1 minute
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+        } catch (error) {
+          console.error("Error updating time spent:", error);
+        }
+      };
+
+      // Only update if lecture is loaded and video exists (user is watching)
+      if (!lecLoading && lecture.video) {
+        updateTime();
+      }
+    }, 60000); // Every 60 seconds
+
+    return () => clearInterval(interval);
+  }, [params.id, lecture.video, lecLoading, token]);
+
   return (
     <>
       {loading ? (
@@ -194,59 +227,99 @@ const Lecture = ({ user }) => {
                   />
                   <h1>{lecture.title}</h1>
                   <h3>{lecture.description}</h3>
+                  <button
+                    onClick={() => addProgress(lecture._id)}
+                    className="common-btn"
+                    style={{ marginTop: "10px", background: "#4caf50" }}
+                  >
+                    Mark as Completed
+                  </button>
                 </>
               ) : (
                 <h1>Please Select a Lecture</h1>
               )}
             </div>
 
+
             <div className="right">
-              {user?.role === "admin" && (
-                <button className="common-btn" onClick={() => setShow(!show)}>
-                  {show ? "Close" : "Add Lecture +"}
+              {/* Tab Navigation */}
+              <div className="lecture-tabs">
+                <button
+                  className={activeTab === "lectures" ? "active-tab" : ""}
+                  onClick={() => setActiveTab("lectures")}
+                >
+                  Lectures
                 </button>
-              )}
+                <button
+                  className={activeTab === "comments" ? "active-tab" : ""}
+                  onClick={() => setActiveTab("comments")}
+                >
+                  Discussion
+                </button>
+              </div>
 
-              {show && (
-                <div className="lecture-form">
-                  <h2>Add Lecture</h2>
-                  <form onSubmit={submitHandler}>
-                    <label>Title</label>
-                    <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
-                    <label>Description</label>
-                    <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} required />
-                    <input type="file" onChange={changeVideoHandler} required />
-                    {videoPrev && <video src={videoPrev} width={300} controls />}
-                    <button disabled={btnLoading} type="submit" className="common-btn">
-                      {btnLoading ? "Please Wait..." : "Add"}
+              {activeTab === "lectures" && (
+                <>
+                  {user?.role === "admin" && (
+                    <button className="common-btn" onClick={() => setShow(!show)}>
+                      {show ? "Close" : "Add Lecture +"}
                     </button>
-                  </form>
-                </div>
+                  )}
+
+                  {show && (
+                    <div className="lecture-form">
+                      <h2>Add Lecture</h2>
+                      <form onSubmit={submitHandler}>
+                        <label>Title</label>
+                        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
+                        <label>Description</label>
+                        <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} required />
+                        <input type="file" onChange={changeVideoHandler} required />
+                        {videoPrev && <video src={videoPrev} width={300} controls />}
+                        <button disabled={btnLoading} type="submit" className="common-btn">
+                          {btnLoading ? "Please Wait..." : "Add"}
+                        </button>
+                      </form>
+                    </div>
+                  )}
+
+                  <div className="lectures-list">
+                    {lectures.length > 0 ? (
+                      lectures.map((e, i) => (
+                        <React.Fragment key={e._id}>
+                          <div
+                            onClick={() => fetchLecture(e._id)}
+                            className={`lecture-number ${lecture._id === e._id ? "active" : ""}`}
+                          >
+                            {i + 1}. {e.title}{" "}
+                            {progress[0]?.completedLectures.includes(e._id) && (
+                              <span style={{ background: "red", padding: "2px", borderRadius: "6px", color: "greenyellow" }}>
+                                <TiTick />
+                              </span>
+                            )}
+                          </div>
+                          {user?.role === "admin" && (
+                            <button className="common-btn" style={{ background: "red" }} onClick={() => deleteHandler(e._id)}>
+                              Delete {e.title}
+                            </button>
+                          )}
+                        </React.Fragment>
+                      ))
+                    ) : (
+                      <p>No Lectures Yet!</p>
+                    )}
+                  </div>
+                </>
               )}
 
-              {lectures.length > 0 ? (
-                lectures.map((e, i) => (
-                  <React.Fragment key={e._id}>
-                    <div
-                      onClick={() => fetchLecture(e._id)}
-                      className={`lecture-number ${lecture._id === e._id ? "active" : ""}`}
-                    >
-                      {i + 1}. {e.title}{" "}
-                      {progress[0]?.completedLectures.includes(e._id) && (
-                        <span style={{ background: "red", padding: "2px", borderRadius: "6px", color: "greenyellow" }}>
-                          <TiTick />
-                        </span>
-                      )}
-                    </div>
-                    {user?.role === "admin" && (
-                      <button className="common-btn" style={{ background: "red" }} onClick={() => deleteHandler(e._id)}>
-                        Delete {e.title}
-                      </button>
-                    )}
-                  </React.Fragment>
-                ))
-              ) : (
-                <p>No Lectures Yet!</p>
+              {activeTab === "comments" && (
+                <div className="discussion-tab">
+                  {lecture._id ? (
+                    <CommentSection courseId={params.id} lectureId={lecture._id} />
+                  ) : (
+                    <p className="select-msg">Select a lecture to view discussion</p>
+                  )}
+                </div>
               )}
             </div>
           </div>

@@ -1,19 +1,28 @@
-
 import { User } from "../models/User.js";
+import { Progress } from "../models/Progress.js";
+import { QuizResult } from "../models/QuizResult.js";
+import { Lecture } from "../models/Lecture.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import sendMail, { sendForgotMail } from "../middlewares/sendMail.js";
 import TryCatch from "../middlewares/TryCatch.js";
+import { Payment } from "../models/Payment.js";
 
 // ================= Register =================
 export const register = TryCatch(async (req, res) => {
-  const { email, name, password } = req.body;
+  const { email, name, password, username } = req.body;
 
-  const existingUser = await User.findOne({ email });
-  if (existingUser) return res.status(400).json({ message: "User Already exists" });
+  const existingUser = await User.findOne({
+    $or: [{ email }, { username }]
+  });
+
+  if (existingUser) {
+    if (existingUser.email === email) return res.status(400).json({ message: "Email already exists" });
+    if (existingUser.username === username) return res.status(400).json({ message: "Username already exists" });
+  }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const user = { name, email, password: hashedPassword };
+  const user = { name, username, email, password: hashedPassword };
 
   const otp = Math.floor(100000 + Math.random() * 900000); // 6-digit OTP
 
@@ -56,6 +65,7 @@ export const verifyUser = TryCatch(async (req, res) => {
 
   await User.create({
     name: verifiedData.user.name,
+    username: verifiedData.user.username,
     email: verifiedData.user.email,
     password: verifiedData.user.password,
   });
@@ -131,6 +141,31 @@ export const myProfile = TryCatch(async (req, res) => {
   res.status(200).json({ user });
 });
 
+// ================= Update Profile =================
+export const updateProfile = TryCatch(async (req, res) => {
+  console.log("--> updateProfile Hit");
+  console.log("Request Body:", req.body);
+  console.log("Request File:", req.file);
+
+  const { name, phone, address, gender } = req.body;
+  const file = req.file; // Check for file
+
+  const user = await User.findById(req.user._id);
+
+  if (name) user.name = name;
+  if (phone) user.phone = phone;
+  if (address) user.address = address;
+  if (gender) user.gender = gender;
+  if (file) user.profilePicture = file.path.replace(/\\/g, "/"); // Normalizing, fixing Windows path issue
+
+  await user.save();
+
+  res.status(200).json({
+    message: "Profile Updated Successfully",
+    user,
+  });
+});
+
 // ================= Forgot Password =================
 export const forgotPassword = TryCatch(async (req, res) => {
   const { email } = req.body;
@@ -168,4 +203,56 @@ export const resetPassword = TryCatch(async (req, res) => {
   await user.save();
 
   res.status(200).json({ message: "Password Reset Successfully" });
+});
+
+// ================= User Analytics =================
+export const getUserAnalytics = TryCatch(async (req, res) => {
+  const userId = req.user._id;
+
+  // 1. Get fresh user for accurate subscription count
+  const user = await User.findById(userId);
+
+  // 2. Get all progress records and populate course
+  const progressRecords = await Progress.find({ user: userId }).populate("course");
+
+  // 3. Enhance records with real percentage calculation
+  const enhancedProgress = await Promise.all(progressRecords.map(async (record) => {
+    if (!record.course) return { ...record._doc, percentage: 0 };
+
+    const totalLectures = await Lecture.countDocuments({ course: record.course._id });
+    const completedCount = record.completedLectures.length;
+
+    // Calculate percentage
+    const percentage = totalLectures > 0
+      ? Math.round((completedCount / totalLectures) * 100)
+      : 0;
+
+    return {
+      ...record._doc,
+      totalLectures,
+      percentage
+    };
+  }));
+
+  // 4. Quiz Performance
+  const quizResults = await QuizResult.find({ user: userId }).sort({ createdAt: -1 });
+
+  // 5. Overall Stats
+  const totalTimeSpent = progressRecords.reduce((acc, curr) => acc + (curr.timeSpent || 0), 0);
+
+  // "Active Courses" - Triple-Source Discovery
+  const subIds = (user.subscription || []).map(id => id?.toString()).filter(Boolean);
+  const progIds = progressRecords.map(p => p.course?._id?.toString() || p.course?.toString()).filter(Boolean);
+  const fromPayments = await Payment.find({ user: user._id });
+  const payIds = fromPayments.map(p => p.course?._id?.toString() || p.course?.toString()).filter(Boolean);
+
+  const activeCourses = [...new Set([...subIds, ...progIds, ...payIds])].length;
+
+  res.status(200).json({
+    progressRecords: enhancedProgress,
+    quizResults,
+    totalTimeSpent,
+    activeCourses,
+    badges: user.badges || [],
+  });
 });

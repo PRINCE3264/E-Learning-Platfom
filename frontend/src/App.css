@@ -1,9 +1,57 @@
+:root {
+  --background: #ffffff;
+  --text: #0f172a;
+  --header-bg: #8a4baf;
+  --card-bg: #ffffff;
+  --border: #e2e8f0;
+  --primary: #8a4baf;
+  --primary-hover: #5f357e;
+  --sidebar-bg: #f8fafc;
+}
+
+[data-theme='dark'] {
+  --background: #0f172a;
+  --text: #f8fafc;
+  --header-bg: #1e293b;
+  --card-bg: #1e293b;
+  --border: #334155;
+  --primary: #a78bfa;
+  --primary-hover: #8b5cf6;
+  --sidebar-bg: #1e293b;
+}
+
 body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--background);
+  color: var(--text);
+  transition: background-color 0.3s, color 0.3s;
+  overflow-x: hidden;
+  width: 100%;
+}
 
-  font-family: Arial, sans-serif;
+/* Admin Layout Fix */
+.admin-layout-container {
+  padding-top: 70px;
+  /* Height of header */
+  min-height: 100vh;
+}
+
+/* Global Content Shifting for Admin Sidebar */
+.admin-sidebar-active {
+  margin-left: 280px;
+  width: calc(100% - 280px);
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .admin-sidebar-active {
+    margin-left: 0;
+    width: 100%;
+  }
 }
 
 .common-btn {

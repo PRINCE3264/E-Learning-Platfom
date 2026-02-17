@@ -7,6 +7,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { CourseData } from "../../context/CourseContext";
 import { UserData } from "../../context/UserContext";
 import { server } from "../../main";
+import axios from "axios";
 
 const CourseStudy = () => {
   const { id } = useParams();
@@ -18,6 +19,24 @@ const CourseStudy = () => {
 
   useEffect(() => {
     fetchCourse(id);
+  }, [id]);
+
+  // ⏱ Time Tracking
+  useEffect(() => {
+    let interval = setInterval(async () => {
+      try {
+        await axios.post(`${server}/api/course/time-spent`, {
+          courseId: id,
+          minutes: 1
+        }, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+        });
+      } catch (error) {
+        console.error("Time tracking sync error", error);
+      }
+    }, 60000); // sync every 1 minute
+
+    return () => clearInterval(interval);
   }, [id]);
 
   // 🔐 Authorization check

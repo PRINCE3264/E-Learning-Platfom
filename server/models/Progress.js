@@ -16,6 +16,10 @@ const schema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    timeSpent: {
+      type: Number,
+      default: 0, // In minutes
+    },
   },
   {
     timestamps: true,

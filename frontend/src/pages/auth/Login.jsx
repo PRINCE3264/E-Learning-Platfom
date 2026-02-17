@@ -1,9 +1,10 @@
 
 
 import React, { useState, useEffect } from "react";
-import "./login.css";
+import "./auth.css";
 import { Link, useNavigate } from "react-router-dom";
 import { UserData } from "../../context/UserContext";
+import { FaEye, FaEyeSlash, FaEnvelope, FaLock, FaSignInAlt } from "react-icons/fa";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ const Login = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
   const [errors, setErrors] = useState({});
 
@@ -61,33 +63,54 @@ const Login = () => {
 
             {/* EMAIL */}
             <div className="form-group">
-              <label>Email</label>
-              <input
-                type="email"
-                className="form-input"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  setErrors({ ...errors, email: "" });
-                }}
-                placeholder="Enter your email"
-              />
+              <label htmlFor="email">Email Address</label>
+              <div className="input-with-icon">
+                <FaEnvelope className="input-icon" />
+                <input
+                  type="email"
+                  id="email"
+                  className="form-input"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setErrors({ ...errors, email: "" });
+                  }}
+                  placeholder="Enter your email"
+                  required
+                />
+              </div>
               {errors.email && <span className="error">{errors.email}</span>}
             </div>
 
             {/* PASSWORD */}
             <div className="form-group">
-              <label>Password</label>
-              <input
-                type="password"
-                className="form-input"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  setErrors({ ...errors, password: "" });
-                }}
-                placeholder="Enter your password"
-              />
+              <label htmlFor="password">Password</label>
+              <div className="input-with-icon">
+                <FaLock className="input-icon" />
+                <div className="password-input-container">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    className="form-input"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setErrors({ ...errors, password: "" });
+                    }}
+                    placeholder="Enter your password"
+                    required
+                    autoComplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+              </div>
               {errors.password && (
                 <span className="error">{errors.password}</span>
               )}
@@ -111,7 +134,16 @@ const Login = () => {
 
             {/* SUBMIT */}
             <button type="submit" className="submit-btn" disabled={btnLoading}>
-              {btnLoading ? "Signing in..." : "Sign In"}
+              {btnLoading ? (
+                <span className="btn-loading">
+                  <span className="loading-spinner"></span>
+                  SIGNING IN...
+                </span>
+              ) : (
+                <>
+                  SIGN IN <FaSignInAlt style={{ marginLeft: "8px" }} />
+                </>
+              )}
             </button>
           </form>
 

@@ -255,6 +255,7 @@ progress::-webkit-progress-value {
 
 .lecture-number:hover {
   background: #e0e7ff;
+  color: #8a4baf;
 }
 
 .lecture-number.active {
@@ -289,4 +290,42 @@ progress::-webkit-progress-value {
   .lecture-page .right {
     max-height: none;
   }
+}
+
+/* =============================
+   TABS
+============================= */
+
+.lecture-tabs {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  background: #f1f5f9;
+  padding: 5px;
+  border-radius: 8px;
+}
+
+.lecture-tabs button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 600;
+  color: #64748b;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.lecture-tabs button.active-tab {
+  background: #fff;
+  color: #4f46e5;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.select-msg {
+  text-align: center;
+  color: #94a3b8;
+  margin-top: 50px;
+  font-size: 14px;
 }

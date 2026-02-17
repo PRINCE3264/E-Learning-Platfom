@@ -1,5 +1,6 @@
-// quizController.js
 import { Quiz } from "../models/Quiz.js";
+import { QuizResult } from "../models/QuizResult.js";
+import { User } from "../models/User.js";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 
@@ -88,6 +89,8 @@ export const submitQuiz = async (req, res) => {
     // Accept string OR array for answers
     if (typeof answers === "string") answers = [answers];
 
+    if (userEmail) userEmail = userEmail.trim().toLowerCase(); // Normalize email
+
     if (!userEmail || !Array.isArray(answers)) {
       return res
         .status(400)
@@ -129,17 +132,17 @@ export const submitQuiz = async (req, res) => {
           <h3>Details:</h3>
           <ul>
             ${quizzes
-              .map((q, i) => {
-                const yourAnswer = answers[i] || "Not answered";
-                const isCorrect = yourAnswer === q.correctAnswer;
-                return `
+        .map((q, i) => {
+          const yourAnswer = answers[i] || "Not answered";
+          const isCorrect = yourAnswer === q.correctAnswer;
+          return `
                   <li>
                     <b>Q${i + 1}: ${q.question}</b><br/>
                     Your Answer: <span class="${isCorrect ? "correct" : "wrong"}">${yourAnswer}</span><br/>
                     Correct Answer: <span class="correct">${q.correctAnswer}</span>
                   </li>`;
-              })
-              .join("")}
+        })
+        .join("")}
           </ul>
         </div>
       </body>
@@ -154,6 +157,18 @@ export const submitQuiz = async (req, res) => {
       html,
     });
 
+    // Save to database if user is logged in (optional based on architecture, but good for analytics)
+    const user = await User.findOne({ email: userEmail });
+    if (user) {
+      await QuizResult.create({
+        user: user._id,
+        score,
+        totalQuestions: quizzes.length,
+        percentage: (score / quizzes.length) * 100,
+        category: quizzes[0]?.category || "General",
+      });
+    }
+
     res.status(200).json({
       message: "Quiz submitted successfully. Result sent to email.",
       score,
@@ -166,3 +181,14 @@ export const submitQuiz = async (req, res) => {
 };
 
 
+// ✅ Get all quiz results (for admin)
+export const getAllQuizResults = async (req, res) => {
+  try {
+    const results = await QuizResult.find()
+      .populate("user", "name email")
+      .sort({ createdAt: -1 });
+    res.status(200).json(results);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

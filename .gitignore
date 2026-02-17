@@ -1,0 +1,17 @@
+# Node modules
+node_modules/
+frontend/node_modules/
+server/node_modules/
+
+# Uploads
+server/uploads/
+
+# Env files
+.env
+.env.*
+
+# Vite cache
+.vite/
+
+# Logs
+*.log

@@ -13,6 +13,16 @@ const schema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  course: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Courses",
+    required: true,
+  },
 
   createdAt: {
     type: Date,

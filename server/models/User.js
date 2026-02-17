@@ -6,6 +6,11 @@ const schema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    username: {
+      type: String,
+      unique: true,
+      sparse: true, // Allow multiple users to have no username (null/undefined)
+    },
     email: {
       type: String,
       required: true,
@@ -23,6 +28,22 @@ const schema = new mongoose.Schema(
       type: String,
       default: "user",
     },
+    status: {
+      type: String,
+      default: "active",
+    },
+    phone: {
+      type: String, // Added Phone
+    },
+    address: {
+      type: String, // Added Address
+    },
+    gender: {
+      type: String, // Added Gender
+    },
+    profilePicture: {
+      type: String, // Added Profile Picture
+    },
     subscription: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -30,6 +51,13 @@ const schema = new mongoose.Schema(
       },
     ],
     resetPasswordExpire: Date,
+    badges: [
+      {
+        title: String,
+        image: String,
+        date: { type: Date, default: Date.now },
+      },
+    ],
   },
   {
     timestamps: true,

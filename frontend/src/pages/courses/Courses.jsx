@@ -9,9 +9,10 @@ import { CourseData } from "../../context/CourseContext";
 import { UserData } from "../../context/UserContext";
 import CourseCard from "../../components/coursecard/CourseCard";
 
-const Courses = () => {
+const Courses = ({ adminSidebarOpen }) => {
   const { courses, loading, fetchCourses } = CourseData();
   const { user, isAuth } = UserData();
+  const isAdmin = user?.role === "admin" || user?.mainrole === "superadmin";
   const [search, setSearch] = useState("");
 
   useEffect(() => {
@@ -27,18 +28,21 @@ const Courses = () => {
   }
 
   return (
-    <div className="courses-page">
+    <div className={`courses-page ${(isAdmin && adminSidebarOpen) ? 'admin-sidebar-active' : ''}`}>
       {/* ===== HEADER ===== */}
       <div className="courses-header">
-        <h1>Explore Courses</h1>
-        <p>Upgrade your skills with industry-ready courses</p>
+        <span className="badge">Knowledge Matrix</span>
+        <h1>Explore Our <span className="gradient-text">Elite Courses</span></h1>
+        <p>Upgrade your skills with industry-ready curriculum designed by world-class architects.</p>
 
-        <input
-          type="text"
-          placeholder="Search courses..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+        <div className="search-wrapper">
+          <input
+            type="text"
+            placeholder="Search courses by name or technology..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
       </div>
 
       {/* ===== COURSES ===== */}

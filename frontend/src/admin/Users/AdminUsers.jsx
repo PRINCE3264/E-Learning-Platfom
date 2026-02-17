@@ -1,148 +1,26 @@
-
-
-
-
-// import React, { useEffect, useState, useMemo } from "react";
-// import { useNavigate } from "react-router-dom";
-// import axios from "axios";
-// import toast from "react-hot-toast";
-// import Layout from "../Utils/Layout";
-// import { server } from "../../main";
-
-// const AdminUsers = ({ user }) => {
-//   const navigate = useNavigate();
-//   const [users, setUsers] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [updatingUserId, setUpdatingUserId] = useState(null);
-
-//   // ✅ Axios instance with token
-//   const axiosInstance = useMemo(() => {
-//     const instance = axios.create({ baseURL: server });
-//     instance.interceptors.request.use(
-//       (config) => {
-//         const token = localStorage.getItem("token");
-//         if (token) config.headers.Authorization = `Bearer ${token}`;
-//         return config;
-//       },
-//       (error) => Promise.reject(error)
-//     );
-//     return instance;
-//   }, []);
-
-//   // 🔹 Redirect non-superadmin
-//   useEffect(() => {
-//     if (!user) return;
-//     if (user.mainrole?.trim().toLowerCase() !== "superadmin") {
-//       toast.error("Access denied: Superadmin only");
-//       navigate("/");
-//     }
-//   }, [user, navigate]);
-
-//   // 🔹 Fetch users
-//   const fetchUsers = async () => {
-//     if (!user || user.mainrole?.trim().toLowerCase() !== "superadmin") return;
-
-//     setLoading(true);
-//     try {
-//       const { data } = await axiosInstance.get("/api/users"); // make sure backend route exists
-//       setUsers(data.users || []);
-//     } catch (error) {
-//       console.error(error);
-//       const msg = error.response?.data?.message || "Failed to fetch users";
-//       toast.error(msg);
-
-//       if (error.response?.status === 401) {
-//         localStorage.removeItem("token");
-//         navigate("/login");
-//       } else if (error.response?.status === 403) {
-//         navigate("/");
-//       }
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   // 🔹 Update user role
-//   const updateRole = async (id) => {
-//     if (!window.confirm("Are you sure you want to update this user role?")) return;
-
-//     setUpdatingUserId(id);
-//     try {
-//       const { data } = await axiosInstance.put(`/api/user/${id}`);
-//       toast.success(data.message || "User role updated");
-//       await fetchUsers();
-//     } catch (error) {
-//       console.error(error);
-//       toast.error(error.response?.data?.message || "Failed to update role");
-//     } finally {
-//       setUpdatingUserId(null);
-//     }
-//   };
-
-//   // 🔹 Load users on mount
-//   useEffect(() => {
-//     fetchUsers();
-//   }, [user]);
-
-//   return (
-//     <Layout>
-//       <div className="users">
-//         <h1>All Users</h1>
-//         {loading ? (
-//           <p>Loading users...</p>
-//         ) : users.length === 0 ? (
-//           <p>No users found</p>
-//         ) : (
-//           <table border="1" className="users-table">
-//             <thead>
-//               <tr>
-//                 <th>#</th>
-//                 <th>Name</th>
-//                 <th>Email</th>
-//                 <th>Role</th>
-//                 <th>Update Role</th>
-//               </tr>
-//             </thead>
-//             <tbody>
-//               {users.map((u, i) => (
-//                 <tr key={u._id}>
-//                   <td>{i + 1}</td>
-//                   <td>{u.name}</td>
-//                   <td>{u.email}</td>
-//                   <td>{u.role}</td>
-//                   <td>
-//                     <button
-//                       className="common-btn"
-//                       disabled={updatingUserId === u._id}
-//                       onClick={() => updateRole(u._id)}
-//                     >
-//                       {updatingUserId === u._id ? "Updating..." : "Update Role"}
-//                     </button>
-//                   </td>
-//                 </tr>
-//               ))}
-//             </tbody>
-//           </table>
-//         )}
-//       </div>
-//     </Layout>
-//   );
-// };
-
-//  export default AdminUsers;
-
-
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Layout from "../Utils/Layout";
 import { server } from "../../main";
+import { MdPersonAdd, MdRefresh, MdSearch, MdFilterList, MdSort, MdDelete, MdSecurity, MdHistory, MdGroups, MdAdminPanelSettings, MdVerifiedUser, MdBlock, MdClose, MdMail, MdLock, MdFace, MdChevronLeft, MdChevronRight, MdAlternateEmail } from "react-icons/md";
 import "./adminUsers.css";
 
-const AdminUsers = ({ user }) => {
+import { UserData } from "../../context/UserContext";
+
+const AdminUsers = ({ user, adminSidebarOpen }) => {
+
   const navigate = useNavigate();
-  const [users, setUsers] = useState([]);
+  const {
+    users,
+    fetchAllUsers,
+    updateUserRole,
+    updateUserStatus,
+    deleteAdminUser,
+    createAdminUser
+  } = UserData();
+
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingUserId, setUpdatingUserId] = useState(null);
@@ -151,88 +29,82 @@ const AdminUsers = ({ user }) => {
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
+
+  // New user form state
+  const [newName, setNewName] = useState("");
+  const [newUsername, setNewUsername] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [newRole, setNewRole] = useState("user");
+  const [profilePic, setProfilePic] = useState(null);
+  const [profilePicPreview, setProfilePicPreview] = useState(null);
+  const [btnLoading, setBtnLoading] = useState(false);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = () => {
+      setProfilePicPreview(reader.result);
+      setProfilePic(file);
+    };
+  };
+
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 10;
 
-  // ✅ Axios instance with token
-  const axiosInstance = useMemo(() => {
-    const instance = axios.create({ baseURL: server });
-    instance.interceptors.request.use(
-      (config) => {
-        const token = localStorage.getItem("token");
-        if (token) config.headers.Authorization = `Bearer ${token}`;
-        return config;
-      },
-      (error) => Promise.reject(error)
-    );
-    return instance;
-  }, []);
-
-  // 🔹 Redirect non-superadmin
+  // 🔹 Redirect non-admin/superadmin
   useEffect(() => {
     if (!user) return;
-    if (user.mainrole?.trim().toLowerCase() !== "superadmin") {
-      toast.error("Access denied: Superadmin only");
+    const isSuperAdmin = user.mainrole?.trim().toLowerCase() === "superadmin";
+    const isAdmin = user.role?.toLowerCase() === "admin";
+
+    if (!isSuperAdmin && !isAdmin) {
+      toast.error("Access denied: Admin only");
       navigate("/");
     }
   }, [user, navigate]);
 
-  // 🔹 Fetch users
+  // 🔹 Fetch users via context
   const fetchUsers = async () => {
-    if (!user || user.mainrole?.trim().toLowerCase() !== "superadmin") return;
-
     setLoading(true);
-    try {
-      const { data } = await axiosInstance.get("/api/users");
-      const formattedUsers = data.users?.map(user => ({
-        ...user,
-        role: user.role || 'user',
-        status: user.status || 'active',
-        registered: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A',
-        lastActive: user.lastActive || 'N/A'
-      })) || [];
-      setUsers(formattedUsers);
-      setFilteredUsers(formattedUsers);
-    } catch (error) {
-      console.error("Fetch error:", error);
-      const msg = error.response?.data?.message || "Failed to fetch users";
-      toast.error(msg);
-
-      if (error.response?.status === 401) {
-        localStorage.removeItem("token");
-        navigate("/login");
-      } else if (error.response?.status === 403) {
-        navigate("/");
-      }
-    } finally {
-      setLoading(false);
-    }
+    await fetchAllUsers();
+    setLoading(false);
   };
 
   // 🔹 Filter and sort users
   useEffect(() => {
     let result = [...users];
 
+    // Add formatted date for display
+    result = result.map(u => ({
+      ...u,
+      role: u.role || 'user',
+      status: u.status || 'active',
+      registered: u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A',
+      registeredTime: u.createdAt ? new Date(u.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''
+    }));
+
     // Apply search filter
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      result = result.filter(user =>
-        user.name?.toLowerCase().includes(term) ||
-        user.email?.toLowerCase().includes(term) ||
-        user.role?.toLowerCase().includes(term)
+      result = result.filter(u =>
+        u.name?.toLowerCase().includes(term) ||
+        u.email?.toLowerCase().includes(term) ||
+        u.role?.toLowerCase().includes(term)
       );
     }
 
     // Apply role filter
     if (roleFilter !== "all") {
-      result = result.filter(user => user.role === roleFilter);
+      result = result.filter(u => u.role === roleFilter);
     }
 
     // Apply sorting
     result.sort((a, b) => {
       let aValue, bValue;
-
       switch (sortBy) {
         case "name":
           aValue = a.name?.toLowerCase() || "";
@@ -263,67 +135,66 @@ const AdminUsers = ({ user }) => {
     });
 
     setFilteredUsers(result);
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1);
   }, [users, searchTerm, roleFilter, sortBy, sortOrder]);
 
   // 🔹 Update user role
-  const updateRole = async (id) => {
+  const handleUpdateRole = async (id) => {
     if (!window.confirm("Are you sure you want to update this user's role?")) return;
-
     setUpdatingUserId(id);
-    try {
-      const userToUpdate = users.find(u => u._id === id);
-      const newRole = userToUpdate.role === "admin" ? "user" : "admin";
-      
-      const { data } = await axiosInstance.put(`/api/user/${id}`, { role: newRole });
-      toast.success(data.message || "User role updated successfully");
-      await fetchUsers(); // Refresh the list
-    } catch (error) {
-      console.error("Update error:", error);
-      toast.error(error.response?.data?.message || "Failed to update role");
-    } finally {
-      setUpdatingUserId(null);
-    }
+    await updateUserRole(id);
+    setUpdatingUserId(null);
   };
 
-  // 🔹 Toggle user status (active/suspended)
-  const toggleStatus = async (id) => {
-    const userToToggle = users.find(u => u._id === id);
-    const newStatus = userToToggle.status === "active" ? "suspended" : "active";
-    
+  // 🔹 Toggle user status
+  const handleToggleStatus = async (user) => {
+    const newStatus = user.status === "active" ? "suspended" : "active";
     if (!window.confirm(`Are you sure you want to ${newStatus === "suspended" ? "suspend" : "activate"} this user?`)) return;
+    await updateUserStatus(user._id, newStatus);
+  };
 
-    try {
-      const { data } = await axiosInstance.put(`/api/user/${id}/status`, { status: newStatus });
-      toast.success(data.message || `User ${newStatus} successfully`);
-      await fetchUsers();
-    } catch (error) {
-      console.error("Status toggle error:", error);
-      toast.error(error.response?.data?.message || "Failed to update status");
+  // 🔹 Create User
+  const handleCreateUser = async (e) => {
+    e.preventDefault();
+    setBtnLoading(true);
+    const data = new FormData();
+    data.append("name", newName);
+    data.append("username", newUsername);
+    data.append("email", newEmail);
+    data.append("password", newPassword);
+    data.append("role", newRole);
+    if (profilePic) data.append("file", profilePic);
+
+    const success = await createAdminUser(data);
+    if (success) {
+      setShowAddModal(false);
+      resetForm();
     }
+    setBtnLoading(false);
+  };
+
+  const resetForm = () => {
+    setNewName("");
+    setNewUsername("");
+    setNewEmail("");
+    setNewPassword("");
+    setNewRole("user");
+    setProfilePic(null);
+    setProfilePicPreview(null);
   };
 
   // 🔹 Delete user
-  const deleteUser = async (id) => {
+  const handleDeleteUser = async () => {
     if (!userToDelete) return;
-
-    try {
-      const { data } = await axiosInstance.delete(`/api/user/${id}`);
-      toast.success(data.message || "User deleted successfully");
-      await fetchUsers();
-    } catch (error) {
-      console.error("Delete error:", error);
-      toast.error(error.response?.data?.message || "Failed to delete user");
-    } finally {
-      setShowDeleteModal(false);
-      setUserToDelete(null);
-    }
+    await deleteAdminUser(userToDelete._id);
+    setShowDeleteModal(false);
+    setUserToDelete(null);
   };
 
   // 🔹 Load users on mount
   useEffect(() => {
     fetchUsers();
-  }, [user]);
+  }, []);
 
   // 🔹 Calculate pagination
   const indexOfLastUser = currentPage * usersPerPage;
@@ -331,70 +202,78 @@ const AdminUsers = ({ user }) => {
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
   const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
 
-  // 🔹 Stats calculation
+  // 🔹 Stats calculation - Precision Engine
   const stats = {
     total: users.length,
-    admins: users.filter(u => u.role === "admin").length,
-    users: users.filter(u => u.role === "user").length,
-    active: users.filter(u => u.status === "active").length,
-    suspended: users.filter(u => u.status === "suspended").length,
-    instructors: users.filter(u => u.role === "instructor").length,
+    superadmins: users.filter(u => u.mainrole?.toLowerCase() === "superadmin").length,
+    admins: users.filter(u => u.role?.toLowerCase() === "admin" || u.mainrole?.toLowerCase() === "superadmin").length,
+    users: users.filter(u => u.role?.toLowerCase() === "user" && u.mainrole?.toLowerCase() !== "superadmin").length,
+    active: users.filter(u => u.status?.toLowerCase() === "active").length,
+    suspended: users.filter(u => u.status?.toLowerCase() === "suspended").length,
+    instructors: users.filter(u => u.role?.toLowerCase() === "instructor").length,
+    totalEnrollments: users.reduce((acc, u) => acc + (u.subscription?.length || 0), 0)
   };
 
-  // 🔹 Get unique roles for filter dropdown
-  const uniqueRoles = ["all", ...new Set(users.map(u => u.role).filter(Boolean))];
+  // 🔹 Get unique roles for filter dropdown including mainrole
+  const uniqueRoles = ["all", ...new Set([...users.map(u => u.role), ...users.map(u => u.mainrole)].filter(Boolean))];
 
   return (
-    <Layout>
+    <Layout adminSidebarOpen={adminSidebarOpen}>
       <div className="admin-users-page">
         {/* Header */}
         <div className="users-header">
           <div className="header-left">
             <h1>User Management</h1>
-            <p className="subtitle">Manage all users, roles, and permissions</p>
+            <div className="meta-info-bar">
+              <span className="subtitle">Manage all users, roles, and permissions</span>
+              <span className="live-date">System Date: {new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
+            </div>
           </div>
           <div className="header-right">
+            <button className="export-btn" onClick={() => toast.success("Exporting system data...")}>
+              <MdHistory /> Export Audit
+            </button>
+            <button className="add-user-trigger" onClick={() => setShowAddModal(true)}>
+              <MdPersonAdd /> Onboard User
+            </button>
             <button className="refresh-btn" onClick={fetchUsers} disabled={loading}>
-              {loading ? "Refreshing..." : "🔄 Refresh"}
+              <MdRefresh className={loading ? "spin" : ""} /> Sync Database
             </button>
           </div>
         </div>
 
         {/* Stats Cards */}
         <div className="users-stats">
-          <div className="stat-card total">
-            <div className="stat-icon">👥</div>
-            <div className="stat-content">
+          <div className="user-stat-card total">
+            <div className="user-stat-icon"><MdGroups /></div>
+            <div className="user-stat-content">
               <h3>{stats.total}</h3>
-              <p>Total Users</p>
+              <p>Network Strength</p>
             </div>
           </div>
-          <div className="stat-card admins">
-            <div className="stat-icon">👑</div>
-            <div className="stat-content">
+          <div className="user-stat-card admins">
+            <div className="user-stat-icon"><MdAdminPanelSettings /></div>
+            <div className="user-stat-content">
               <h3>{stats.admins}</h3>
-              <p>Admins</p>
+              <p>Administrators</p>
             </div>
+            {stats.superadmins > 0 && (
+              <span className="superadmin-mini-badge">+{stats.superadmins} Super</span>
+            )}
           </div>
-          <div className="stat-card users">
-            <div className="stat-icon">👤</div>
-            <div className="stat-content">
-              <h3>{stats.users}</h3>
-              <p>Regular Users</p>
-            </div>
-          </div>
-          <div className="stat-card active">
-            <div className="stat-icon">✅</div>
-            <div className="stat-content">
+
+          <div className="user-stat-card active">
+            <div className="user-stat-icon"><MdVerifiedUser /></div>
+            <div className="user-stat-content">
               <h3>{stats.active}</h3>
-              <p>Active Users</p>
+              <p>Active Channels</p>
             </div>
           </div>
-          <div className="stat-card instructors">
-            <div className="stat-icon">👨‍🏫</div>
-            <div className="stat-content">
-              <h3>{stats.instructors}</h3>
-              <p>Instructors</p>
+          <div className="user-stat-card enrollments">
+            <div className="user-stat-icon"><MdHistory /></div>
+            <div className="user-stat-content">
+              <h3>{stats.totalEnrollments}</h3>
+              <p>Network Enrollments</p>
             </div>
           </div>
         </div>
@@ -456,89 +335,117 @@ const AdminUsers = ({ user }) => {
           {loading ? (
             <div className="loading-container">
               <div className="loading-spinner"></div>
-              <p>Loading users...</p>
+              <p>Fetching Users...</p>
             </div>
           ) : filteredUsers.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-icon">👤</div>
-              <h3>No users found</h3>
-              <p>{searchTerm || roleFilter !== "all" ? "Try adjusting your filters" : "No users in the system yet"}</p>
+              <div className="empty-icon">📭</div>
+              <h3>No match found</h3>
+              <p>We couldn't find any users matching your current filters.</p>
             </div>
           ) : (
             <>
               <table className="users-table">
                 <thead>
                   <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
+                    <th>#</th>
+                    <th>User Profile</th>
+                    <th>Username</th>
+                    <th>Email Address</th>
+                    <th>Clearance</th>
+                    <th>Security</th>
                     <th>Status</th>
-                    <th>Registered</th>
+                    <th>Enrollments</th>
+                    <th>Reg. Date</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {currentUsers.map((user, index) => (
-                    <tr key={user._id} className={user.status === "suspended" ? "suspended" : ""}>
-                      <td className="user-id">{indexOfFirstUser + index + 1}</td>
-                      <td className="user-name">
+                    <tr key={user._id}>
+                      <td className="user-id-text">{indexOfFirstUser + index + 1}</td>
+                      <td>
                         <div className="name-cell">
-                          <div className="user-avatar">
+                          <div className="user-avatar-circle">
                             {user.name?.charAt(0).toUpperCase() || "U"}
                           </div>
-                          <div>
-                            <strong>{user.name || "N/A"}</strong>
-                            <div className="user-id-small">ID: {user._id?.substring(0, 8)}...</div>
+                          <div className="user-details">
+                            <strong>{user.name || "Unknown User"}</strong>
+                            <span className="user-id-text">ID: #{user._id?.substring(0, 6)}</span>
                           </div>
                         </div>
                       </td>
-                      <td className="user-email">{user.email || "N/A"}</td>
+                      <td className="user-username">@{user.username || user.name?.toLowerCase().replace(/\s/g, '_')}</td>
+                      <td className="user-email">{user.email}</td>
                       <td>
-                        <span className={`role-badge ${user.role}`}>
-                          {user.role || "user"}
-                        </span>
+                        <div className="role-stack">
+                          <span className={`role-badge ${user.role}`}>
+                            {user.role === 'admin' ? '👑 Admin' : user.role === 'instructor' ? '👨‍🏫 Instructor' : '👤 User'}
+                          </span>
+                          {user.mainrole === 'superadmin' && (
+                            <span className="authority-tag super">SUPERADMIN</span>
+                          )}
+                        </div>
                       </td>
                       <td>
-                        <span className={`status-badge ${user.status || "active"}`}>
-                          {user.status || "active"}
-                        </span>
+                        <div className="security-status">
+                          <span className={`security-badge ${user.isVerified ? 'verified' : 'pending'}`}>
+                            {user.isVerified ? 'Verified' : 'Unverified'}
+                          </span>
+                        </div>
                       </td>
-                      <td className="registered-date">{user.registered}</td>
-                      <td className="actions-cell">
-                        <div className="actions-group">
+                      <td>
+                        <div className={`status-indicator status-${user.status || "active"}`}>
+                          <span className="dot"></span>
+                          <span>{user.status === 'active' ? 'Active' : 'Suspended'}</span>
+                        </div>
+                      </td>
+                      <td className="enrollment-cell">
+                        <div className="enrollment-count">
+                          <strong>{user.subscription?.length || 0}</strong>
+                          <span>Courses</span>
+                        </div>
+                      </td>
+                      <td className="registered-date">
+                        <div className="date-stack">
+                          <span className="main-date">{user.registered}</span>
+                          <span className="sub-time">{user.registeredTime}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="actions-group-premium">
                           <button
-                            className={`action-btn ${user.role === "admin" ? "revoke-btn" : "promote-btn"}`}
-                            onClick={() => updateRole(user._id)}
+                            className={`action-icon-btn promote ${user.role === 'admin' ? 'revoke' : ''}`}
+                            onClick={() => handleUpdateRole(user._id)}
                             disabled={updatingUserId === user._id}
-                            title={user.role === "admin" ? "Revoke Admin" : "Make Admin"}
+                            title={user.role === "admin" ? "Demote to User" : "Make Admin"}
                           >
                             {updatingUserId === user._id ? (
-                              "Updating..."
+                              <MdRefresh className="spin" />
                             ) : user.role === "admin" ? (
-                              "👑 Revoke Admin"
+                              <MdSecurity />
                             ) : (
-                              "👑 Make Admin"
+                              <MdAdminPanelSettings />
                             )}
                           </button>
 
                           <button
-                            className={`action-btn ${user.status === "active" ? "suspend-btn" : "activate-btn"}`}
-                            onClick={() => toggleStatus(user._id)}
-                            title={user.status === "active" ? "Suspend User" : "Activate User"}
+                            className={`action-icon-btn status ${user.status === 'active' ? 'block' : 'unblock'}`}
+                            onClick={() => handleToggleStatus(user)}
+                            title={user.status === "active" ? "Suspend Account" : "Activate Account"}
                           >
-                            {user.status === "active" ? "⏸️ Suspend" : "▶️ Activate"}
+                            {user.status === "active" ? <MdBlock /> : <MdVerifiedUser />}
                           </button>
 
                           <button
-                            className="action-btn delete-btn"
+                            className="action-icon-btn delete"
                             onClick={() => {
                               setUserToDelete(user);
                               setShowDeleteModal(true);
                             }}
                             title="Delete User"
                           >
-                            🗑️ Delete
+                            <MdDelete />
                           </button>
                         </div>
                       </td>
@@ -555,35 +462,19 @@ const AdminUsers = ({ user }) => {
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
                   >
-                    ← Previous
+                    <MdChevronLeft /> Prev
                   </button>
 
                   <div className="page-numbers">
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      let pageNum;
-                      if (totalPages <= 5) {
-                        pageNum = i + 1;
-                      } else if (currentPage <= 3) {
-                        pageNum = i + 1;
-                      } else if (currentPage >= totalPages - 2) {
-                        pageNum = totalPages - 4 + i;
-                      } else {
-                        pageNum = currentPage - 2 + i;
-                      }
-
-                      if (pageNum > 0 && pageNum <= totalPages) {
-                        return (
-                          <button
-                            key={pageNum}
-                            className={`page-number ${currentPage === pageNum ? "active" : ""}`}
-                            onClick={() => setCurrentPage(pageNum)}
-                          >
-                            {pageNum}
-                          </button>
-                        );
-                      }
-                      return null;
-                    })}
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(num => (
+                      <button
+                        key={num}
+                        className={`page-number ${currentPage === num ? "active" : ""}`}
+                        onClick={() => setCurrentPage(num)}
+                      >
+                        {num}
+                      </button>
+                    ))}
                   </div>
 
                   <button
@@ -591,7 +482,7 @@ const AdminUsers = ({ user }) => {
                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
                   >
-                    Next →
+                    Next <MdChevronRight />
                   </button>
 
                   <div className="page-info">
@@ -604,28 +495,190 @@ const AdminUsers = ({ user }) => {
         </div>
       </div>
 
+      {/* Onboard User Modal - Elite Industrial Variant */}
+      {showAddModal && (
+        <div className="user-modal-overlay">
+          <div className="user-form-modal elite-variant">
+            <div className="modal-header-elite">
+              <div className="header-main-content">
+                <div className="header-brand-icon"><MdPersonAdd /></div>
+                <div className="header-titles">
+                  <h2>Digital Identity Provisioning</h2>
+                  <p>Onboard a new node into the ecosystem mainframe.</p>
+                </div>
+              </div>
+              <button className="close-elite-btn" onClick={() => { setShowAddModal(false); resetForm(); }}>
+                <MdClose />
+              </button>
+            </div>
+
+            <div className="modal-grid-layout">
+              <form onSubmit={handleCreateUser} className="elite-onboarding-form">
+                <div className="form-segment">
+                  <label className="segment-indicator">01. Visual Identity</label>
+                  <div className="profile-upload-mini">
+                    <div className="preview-avatar-elite">
+                      {profilePicPreview ? <img src={profilePicPreview} alt="Preview" /> : <MdFace />}
+                    </div>
+                    <label className="elite-upload-label">
+                      Choose Digital Identity Avatar
+                      <input type="file" onChange={handleImageChange} accept="image/*" />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="form-segment">
+                  <label className="segment-indicator">02. Core Identity</label>
+
+                  <div className="form-group-elite">
+                    <label><MdFace /> Legal Name</label>
+                    <div className="elite-input-wrapper">
+                      <MdFace className="elite-field-icon" />
+                      <input
+                        type="text"
+                        placeholder="e.g. Alan Turing"
+                        value={newName}
+                        onChange={(e) => setNewName(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group-elite">
+                    <label><MdAlternateEmail /> System Username</label>
+                    <div className="elite-input-wrapper">
+                      <MdAlternateEmail className="elite-field-icon" />
+                      <input
+                        type="text"
+                        placeholder="e.g. turing_01"
+                        value={newUsername}
+                        onChange={(e) => setNewUsername(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group-elite">
+                    <label><MdMail /> Network Address (Email)</label>
+                    <div className="elite-input-wrapper">
+                      <MdMail className="elite-field-icon" />
+                      <input
+                        type="email"
+                        placeholder="identity@nexus.com"
+                        value={newEmail}
+                        onChange={(e) => setNewEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-segment">
+                  <label className="segment-indicator">02. Authorization Matrix</label>
+
+                  <div className="form-group-elite">
+                    <label><MdLock /> Primary Access Key</label>
+                    <div className="elite-input-wrapper">
+                      <MdLock className="elite-field-icon" />
+                      <input
+                        type="password"
+                        placeholder="Generate secure key..."
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group-elite">
+                    <label><MdAdminPanelSettings /> Clearance Level</label>
+                    <div className="elite-input-wrapper">
+                      <MdAdminPanelSettings className="elite-field-icon" />
+                      <select
+                        value={newRole}
+                        onChange={(e) => setNewRole(e.target.value)}
+                      >
+                        <option value="user">Standard Node (User)</option>
+                        <option value="admin">System Administrator</option>
+                        <option value="instructor">Field Instructor</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="elite-form-actions">
+                  <button type="submit" disabled={btnLoading} className="elite-cta-primary">
+                    {btnLoading ? (
+                      <span className="sync-box"><MdRefresh className="spin" /> Syncing...</span>
+                    ) : (
+                      <>Execute Provisioning</>
+                    )}
+                  </button>
+                  <button type="button" onClick={() => { setShowAddModal(false); resetForm(); }} className="elite-cta-secondary">
+                    Abort Protocol
+                  </button>
+                </div>
+              </form>
+
+              <div className="identity-preview-panel">
+                <div className="preview-label">Live Identity Snapshot</div>
+                <div className="identity-card-wireframe">
+                  <div className="wireframe-avatar">
+                    {newName ? newName.charAt(0).toUpperCase() : "?"}
+                  </div>
+                  <div className="wireframe-info">
+                    <h4>{newName || "Awaiting Name..."}</h4>
+                    <p>{newEmail || "Awaiting Email..."}</p>
+                    <span className={`preview-role-badge ${newRole}`}>
+                      {newRole.toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="wireframe-stats">
+                    <div className="stat-node">
+                      <label>Status</label>
+                      <span>PRE-ACTIVE</span>
+                    </div>
+                    <div className="stat-node">
+                      <label>Node Type</label>
+                      <span>{newRole === 'admin' ? 'SYSTEM' : 'FIELD'}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="security-briefing">
+                  <MdSecurity />
+                  <p>Upon execution, the new identity will be encrypted and granted access to requested sectors.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Delete Confirmation Modal */}
       {showDeleteModal && userToDelete && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3>⚠️ Confirm Delete</h3>
-              <button className="modal-close" onClick={() => setShowDeleteModal(false)}>
-                ×
-              </button>
+        <div className="user-modal-overlay">
+          <div className="user-form-modal delete-variant">
+            <div className="modal-header-admin danger">
+              <h2>
+                <div className="header-icon-box danger-icon"><MdDelete /></div>
+                <span>Termination Protocol</span>
+              </h2>
+              <button className="close-x-btn" onClick={() => setShowDeleteModal(false)}><MdClose /></button>
             </div>
-            <div className="modal-body">
-              <p>
-                Are you sure you want to delete user <strong>{userToDelete.name}</strong> ({userToDelete.email})?
-              </p>
-              <p className="warning-text">This action cannot be undone. All user data will be permanently deleted.</p>
+
+            <div className="modal-body-admin">
+              <p>Requested termination for identity: <strong>{userToDelete.name}</strong></p>
+              <div className="critical-warning">
+                <MdBlock /> <strong>CRITICAL:</strong> All associated data snapshots and access permissions will be permanently purged from the mainframe. This operation cannot be neutralized.
+              </div>
             </div>
-            <div className="modal-footer">
-              <button className="modal-btn cancel-btn" onClick={() => setShowDeleteModal(false)}>
-                Cancel
+
+            <div className="modal-footer-admin">
+              <button className="modal-btn-confirm delete-bg" onClick={handleDeleteUser}>
+                Authorize Wipe
               </button>
-              <button className="modal-btn delete-confirm-btn" onClick={() => deleteUser(userToDelete._id)}>
-                Delete Permanently
+              <button className="modal-btn-cancel" onClick={() => setShowDeleteModal(false)}>
+                Cancel Request
               </button>
             </div>
           </div>

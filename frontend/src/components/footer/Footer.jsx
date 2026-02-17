@@ -45,9 +45,14 @@ import {
   AiOutlineMail,
 } from "react-icons/ai";
 
-const Footer = () => {
+import { UserData } from "../../context/UserContext";
+
+const Footer = ({ adminSidebarOpen }) => {
+  const { user } = UserData();
+  const isAdmin = user?.role === "admin" || user?.mainrole === "superadmin";
+
   return (
-    <footer className="footer">
+    <footer className={`footer ${(isAdmin && adminSidebarOpen) ? 'admin-sidebar-active' : ''}`}>
       <div className="footer-container">
         {/* ABOUT */}
         <div className="footer-box">

@@ -9,8 +9,8 @@ const Testimonials = () => {
       position: "Full Stack Web Development Student",
       message:
         "This platform helped me gain real-world skills. The courses are well structured and easy to follow.",
-     // image: "https://randomuser.me/api/portraits/men/32.jpg",
-      image:"images/IMG-20241224-WA0130.jpg"
+      // image: "https://randomuser.me/api/portraits/men/32.jpg",
+      image: "images/IMG-20241224-WA0130.jpg"
     },
 
     {
@@ -33,11 +33,11 @@ const Testimonials = () => {
 
   return (
     <section className="testimonials">
-      {/* ===== HEADER ===== */}
-      <h2 className="title">What Our Students Say</h2>
-      <p className="subtitle">
-        Real feedback from learners who transformed their careers
-      </p>
+      <div className="testimonials-header">
+        <span className="badge">Student Success</span>
+        <h2 className="title">What Our <span className="gradient-text">Students Say</span></h2>
+        <p className="subtitle">Real feedback from learners who transformed their careers through elite mentorship.</p>
+      </div>
 
       {/* ===== CARDS ===== */}
       <div className="testimonial-cards">
