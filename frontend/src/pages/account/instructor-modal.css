@@ -3,27 +3,46 @@
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(12px) saturate(180%);
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(8px);
     display: flex;
-    align-items: center;
+    align-items: flex-start; /* Better for scrolling tall modals */
     justify-content: center;
-    z-index: 2000;
+    z-index: 2500;
+    overflow-y: auto; /* Allow overlay itself to scroll if needed */
+    padding: 20px 0;
     animation: fadeIn 0.3s ease;
 }
 
 .elite-modal-content {
     background: #ffffff;
-    width: 90%;
+    width: 95%;
     max-width: 650px;
-    max-height: 90vh;
-    border-radius: 32px;
-    padding: 3rem;
-    overflow-y: auto;
+    margin: auto; /* Centering helper with align-items: flex-start */
+    border-radius: 28px;
+    padding: 2.5rem;
     position: relative;
-    box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.3);
     animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Scrollbar styling for a premium feel */
+.elite-modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.elite-modal-content::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.elite-modal-content::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.elite-modal-content::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }
 
 @keyframes fadeIn {

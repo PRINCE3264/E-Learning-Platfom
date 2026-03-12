@@ -11,24 +11,25 @@ import { Payment } from "../models/Payment.js";
 // ================= Register =================
 export const register = TryCatch(async (req, res) => {
   const { email, name, password, username } = req.body;
+  const normalizedEmail = email.toLowerCase();
 
   const existingUser = await User.findOne({
-    $or: [{ email }, { username }]
+    $or: [{ email: normalizedEmail }, { username }]
   });
 
   if (existingUser) {
-    if (existingUser.email === email) return res.status(400).json({ message: "Email already exists" });
+    if (existingUser.email === normalizedEmail) return res.status(400).json({ message: "Email already exists" });
     if (existingUser.username === username) return res.status(400).json({ message: "Username already exists" });
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const user = { name, username, email, password: hashedPassword };
+  const user = { name, username, email: normalizedEmail, password: hashedPassword };
 
   const otp = Math.floor(100000 + Math.random() * 900000); // 6-digit OTP
 
   const activationToken = jwt.sign({ user, otp }, process.env.ACTIVATION_SECRET, { expiresIn: "5m" });
 
-  await sendMail(email, "E-learning", { name, otp });
+  await sendMail(normalizedEmail, "E-learning", { name, otp });
 
   res.status(200).json({
     message: "OTP sent to your email",
@@ -103,9 +104,10 @@ export const verifyUser = TryCatch(async (req, res) => {
 
 export const loginUser = TryCatch(async (req, res) => {
   const { email, password } = req.body;
+  const normalizedEmail = email.toLowerCase();
 
   // 1️⃣ Find user by email
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email: normalizedEmail });
   if (!user) return res.status(400).json({ message: "No User with this email" });
 
   // 2️⃣ Verify password
@@ -169,12 +171,13 @@ export const updateProfile = TryCatch(async (req, res) => {
 // ================= Forgot Password =================
 export const forgotPassword = TryCatch(async (req, res) => {
   const { email } = req.body;
+  const normalizedEmail = email.toLowerCase();
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email: normalizedEmail });
   if (!user) return res.status(404).json({ message: "No User with this email" });
 
-  const token = jwt.sign({ email }, process.env.FORGOT_SECRET, { expiresIn: "5m" });
-  await sendForgotMail(email, "E-learning Reset Password", { email, token });
+  const token = jwt.sign({ email: normalizedEmail }, process.env.FORGOT_SECRET, { expiresIn: "5m" });
+  await sendForgotMail(normalizedEmail, "E-learning Reset Password", { email: normalizedEmail, token });
 
   user.resetPasswordExpire = Date.now() + 5 * 60 * 1000;
   await user.save();

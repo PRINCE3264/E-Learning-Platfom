@@ -110,66 +110,66 @@ const Verify = () => {
             <button className="back-btn" onClick={() => navigate(-1)}>
               <FaArrowLeft /> Back
             </button>
-            <div className="header-meta">
+            <div className="header-row">
               <div className="header-icon">
                 <FaShieldAlt />
               </div>
               <h2>Verify Your Account</h2>
             </div>
-            <div className="subtitle">
-              <FaEnvelope size={14} />
-              <span>Check your email for the 6-digit code</span>
-            </div>
+            <p className="subtitle">
+              <FaEnvelope size={12} />
+              Check your email for the 6-digit code
+            </p>
           </div>
 
-          <div className="timer-section">
+          <div className="timer-bar">
             <div className="timer-info">
               <span className="timer-label">Code expires in</span>
-              <span className={`timer ${timeLeft < 60 ? 'warning' : ''}`}>
+              <span className={`timer-clock ${timeLeft < 60 ? 'warning' : ''}`}>
                 {formatTime(timeLeft)}
               </span>
             </div>
             <button
-              className={`resend-btn ${canResend ? 'active' : ''}`}
+              className={`resend-action ${canResend ? 'active' : ''}`}
               onClick={handleResendOtp}
               disabled={!canResend}
             >
-              {canResend ? 'Resend' : 'Wait'}
+              {canResend ? 'Resend OTP' : 'Please wait...'}
             </button>
           </div>
 
           {message.text && (
-            <div className={`message ${message.type}`}>
+            <div className={`status-msg ${message.type}`}>
               {message.type === 'success' ? <FaCheckCircle /> : <FaShieldAlt />}
               <span>{message.text}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
-            <div className="otp-container" onPaste={handlePaste}>
-              <label className="otp-label">Enter Verification Code</label>
-              <div className="otp-box">
+          <form onSubmit={handleSubmit} className="otp-form">
+            <div className="otp-field-group">
+              <label className="otp-title">Enter Verification Code</label>
+              <div className="otp-box-container" onPaste={handlePaste}>
                 {otp.map((digit, index) => (
                   <input
                     key={index}
                     ref={(el) => (inputsRef.current[index] = el)}
                     type="text"
-                    maxLength="5"
+                    maxLength="1"
                     value={digit}
                     onFocus={(e) => e.target.select()}
                     onChange={(e) => handleChange(e.target.value, index)}
                     onKeyDown={(e) => handleKeyDown(e, index)}
-                    className={`otp-input ${digit ? 'filled' : ''}`}
+                    className={`otp-digit-input ${digit ? 'active' : ''}`}
                     inputMode="numeric"
-                    autoComplete="off"
+                    autoComplete="one-time-code"
                     disabled={btnLoading}
                   />
                 ))}
               </div>
             </div>
 
-            <div className="form-actions">
-              <div className="captcha-container">
+            <div className="form-footer">
+              <div className="captcha-wrapper">
                 <ReCAPTCHA
                   sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
                   onChange={() => setShowBtn(true)}
@@ -179,49 +179,49 @@ const Verify = () => {
               {showBtn && (
                 <button
                   type="submit"
-                  className="submit-btn"
+                  className="verify-submit-btn"
                   disabled={btnLoading}
                 >
-                  {btnLoading ? <div className="spinner"></div> : 'Verify Account'}
+                  {btnLoading ? <div className="loader-spin"></div> : 'Verify & Continue'}
                 </button>
               )}
             </div>
           </form>
 
-          <p className="login-link">
+          <p className="auth-footer-link">
             Already verified? <Link to="/login">Login here</Link>
           </p>
         </div>
 
-        <div className="verify-info">
-          <h4><FaShieldAlt /> Security Overview</h4>
-          <ul className="info-list">
-            <li className="info-item">
-              <div className="info-bullet"></div>
-              <span>Never share your verification code with anyone else.</span>
+        <div className="security-panel">
+          <h3><FaShieldAlt /> Security Overview</h3>
+          <ul className="security-hints">
+            <li>
+              <span className="dot"></span>
+              <p>Never share your verification code with anyone else.</p>
             </li>
-            <li className="info-item">
-              <div className="info-bullet"></div>
-              <span>Our team will never ask for your OTP over phone or chat.</span>
+            <li>
+              <span className="dot"></span>
+              <p>Our team will never ask for your OTP over phone or chat.</p>
             </li>
-            <li className="info-item">
-              <div className="info-bullet"></div>
-              <span>The code is only valid for a single registration session.</span>
+            <li>
+              <span className="dot"></span>
+              <p>The code is only valid for a single registration session.</p>
             </li>
-            <li className="info-item">
-              <div className="info-bullet"></div>
-              <span>Use the same browser tab where you started the process.</span>
+            <li>
+              <span className="dot"></span>
+              <p>Use the same browser tab where you started the process.</p>
             </li>
-            <li className="info-item">
-              <div className="info-bullet"></div>
-              <span>Check your spam folder if the email doesn't arrive soon.</span>
+            <li>
+              <span className="dot"></span>
+              <p>Check your spam folder if the email doesn't arrive soon.</p>
             </li>
           </ul>
 
-          <div className="info-footer">
+          <div className="panel-footer">
             <p>Didn't receive code?</p>
             <button
-              className={`link-btn ${canResend ? 'active' : ''}`}
+              className={`text-action-btn ${canResend ? 'enabled' : ''}`}
               onClick={handleResendOtp}
               disabled={!canResend}
             >

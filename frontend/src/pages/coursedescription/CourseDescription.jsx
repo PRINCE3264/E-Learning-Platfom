@@ -1,5 +1,4 @@
 
-
 import React, { useEffect, useState, useMemo } from "react";
 import "./coursedescription.css";
 import { useNavigate, useParams } from "react-router-dom";
@@ -10,12 +9,12 @@ import toast from "react-hot-toast";
 import { UserData } from "../../context/UserContext";
 import Loading from "../../components/loading/Loading";
 
-const CourseDescription = () => {
+const CourseDescription = ({ user, adminSidebarOpen }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  const { user, fetchUser } = UserData();
+  const { fetchUser } = UserData();
   const { fetchCourse, course, fetchCourses, fetchMyCourses } = CourseData();
 
   useEffect(() => {
@@ -28,7 +27,11 @@ const CourseDescription = () => {
     return (
       user.role === "admin" ||
       user.subscription?.some(
-        (cid) => cid === course._id || cid?._id === course._id
+        (cid) => {
+          const courseId = course._id?.toString() || course._id;
+          const subscriptionId = cid?._id?.toString() || cid?.toString();
+          return subscriptionId === courseId;
+        }
       )
     );
   }, [user, course]);
@@ -74,13 +77,12 @@ const CourseDescription = () => {
             );
 
             // 🔥🔥 CRITICAL FIX 🔥🔥
-            await fetchUser();       // update user.subscription
+            await fetchUser();       
             await fetchCourses();
             await fetchMyCourses();
 
             toast.success(data.message);
 
-            // ⏳ small delay so UI updates before navigation
             setTimeout(() => {
               navigate(`/course/study/${id}`);
             }, 300);
@@ -93,7 +95,8 @@ const CourseDescription = () => {
         theme: { color: "#8a4baf" },
       };
 
-      new window.Razorpay(options).open();
+      const rzp = new window.Razorpay(options);
+      rzp.open();
     } catch (error) {
       toast.error("Checkout failed");
       setLoading(false);
@@ -103,55 +106,57 @@ const CourseDescription = () => {
   if (loading) return <Loading />;
 
   return (
-    course && (
-      <div className="course-description">
-        <div className="course-header">
-          <img
-            src={`${server}/${course.image}`}
-            alt={course.title}
-            className="course-images"
-          />
+    <>
+      {course && (
+        <div className="course-description">
+          <div className="course-header">
+            <img
+              src={`${server}/${course.image}`}
+              alt={course.title}
+              className="course-images"
+            />
 
-          <div className="course-info">
-            <h2>{course.title}</h2>
+            <div className="course-info">
+              <h2>{course.title}</h2>
 
-            <div className="course-meta">
-              <span>👨‍🏫 {course.createdBy}</span>
-              <span>⏱ {course.duration} weeks</span>
-              <span>🎯 Beginner</span>
-            </div>
+              <div className="course-meta">
+                <span>👨‍🏫 {course.createdBy}</span>
+                <span>⏱ {course.duration} weeks</span>
+                <span>🎯 Beginner</span>
+              </div>
 
-            <div className="course-rating">
-              ⭐⭐⭐⭐⭐ <span>(4.8)</span>
-            </div>
+              <div className="course-rating">
+                ⭐⭐⭐⭐⭐ <span>(4.8)</span>
+              </div>
 
-            <div className="price-box">
-              <span className="price">₹{course.price}</span>
-              <span className="discount">20% OFF</span>
+              <div className="price-box">
+                <span className="price">₹{course.price}</span>
+                <span className="discount">20% OFF</span>
+              </div>
             </div>
           </div>
+
+          <p className="course-desc">{course.description}</p>
+
+          {/* ✅ ACTION */}
+          {isEnrolled ? (
+            <button
+              className="common-btn sticky-btn"
+              onClick={() => navigate(`/course/study/${course._id}`)}
+            >
+              ▶ Start Learning
+            </button>
+          ) : (
+            <button
+              className="common-btn sticky-btn"
+              onClick={checkoutHandler}
+            >
+              💳 Buy Now
+            </button>
+          )}
         </div>
-
-        <p className="course-desc">{course.description}</p>
-
-        {/* ✅ ACTION */}
-        {isEnrolled ? (
-          <button
-            className="common-btn sticky-btn"
-            onClick={() => navigate(`/course/study/${course._id}`)}
-          >
-            ▶ Start Learning
-          </button>
-        ) : (
-          <button
-            className="common-btn sticky-btn"
-            onClick={checkoutHandler}
-          >
-            💳 Buy Now
-          </button>
-        )}
-      </div>
-    )
+      )}
+    </>
   );
 };
 

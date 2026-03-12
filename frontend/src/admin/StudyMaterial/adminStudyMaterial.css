@@ -1,5 +1,6 @@
 /* Admin Study Material Page - High Performance Architectural UI */
 .admin-materials-container {
+    
     padding: 20px;
     animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     max-width: 1400px;
@@ -20,6 +21,7 @@
 
 /* Header Refinement */
 .materials-header-elite {
+    margin: 80px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -32,6 +34,7 @@
 }
 
 .header-info h1 {
+    
     font-size: 1.6rem;
     font-weight: 800;
     color: #0f172a;

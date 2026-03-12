@@ -48,8 +48,6 @@ const App = () => {
       ) : (
         <BrowserRouter>
           <Header
-            isAuth={isAuth}
-            user={user}
             adminSidebarOpen={adminSidebarOpen}
             setAdminSidebarOpen={setAdminSidebarOpen}
           />
@@ -88,7 +86,7 @@ const App = () => {
             />
             <Route
               path="/course/:id"
-              element={isAuth ? <CourseDescription user={user} /> : <Login />}
+              element={isAuth ? <CourseDescription user={user} adminSidebarOpen={adminSidebarOpen} /> : <Login />}
             />
             <Route
               path="/payment-success/:id"

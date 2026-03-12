@@ -67,7 +67,7 @@ const sendMail = async (email, subject, data) => {
 
 export default sendMail;
 
-export const sendForgotMail = async (subject, data) => {
+export const sendForgotMail = async (email, subject, data) => {
   const transport = createTransport({
     host: "smtp.gmail.com",
     port: 465,
@@ -143,7 +143,7 @@ export const sendForgotMail = async (subject, data) => {
 
   await transport.sendMail({
     from: process.env.Gmail,
-    to: data.email,
+    to: email,
     subject,
     html,
   });

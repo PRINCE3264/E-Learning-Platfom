@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./header.css";
 import { Link, NavLink } from "react-router-dom";
 
-import { FaBars, FaTimes } from "react-icons/fa";
+import { FaBars, FaTimes, FaSignOutAlt } from "react-icons/fa";
 import { MdAccountCircle, MdLogin } from "react-icons/md";
 import Sidebar from "./Sidebar";
 import AdminSidebar from "../../admin/Utils/Sidebar";
@@ -10,13 +10,14 @@ import { UserData } from "../../context/UserContext";
 
 
 
-const Header = ({ isAuth, user, adminSidebarOpen, setAdminSidebarOpen }) => {
+const Header = ({ adminSidebarOpen, setAdminSidebarOpen }) => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { logoutUser } = UserData();
+  const { isAuth, user, logoutUser } = UserData();
 
   // Close sidebar handler
   const closeMenu = () => {
     setMenuOpen(false);
+    setAdminSidebarOpen(false);
   };
 
   // Toggle sidebar handler
@@ -65,12 +66,12 @@ const Header = ({ isAuth, user, adminSidebarOpen, setAdminSidebarOpen }) => {
 
 
           {isAuth ? (
-            <NavLink to="/account" className="auth-btn" onClick={closeMenu}>
-              <MdAccountCircle style={{ fontSize: '20px' }} /> Account
-            </NavLink>
+            <button className="auth-btn logout-btn" onClick={() => { logoutUser(); closeMenu(); }}>
+              <FaSignOutAlt style={{ fontSize: '16px' }} /> Logout
+            </button>
           ) : (
-            <NavLink to="/login" className="auth-btn" onClick={closeMenu}>
-              <MdLogin style={{ fontSize: '18px' }} /> Login
+            <NavLink to="/account" className="auth-btn account-btn" onClick={closeMenu}>
+              <MdAccountCircle style={{ fontSize: '20px' }} /> Account
             </NavLink>
           )}
         </nav>

@@ -37,6 +37,14 @@ const Sidebar = ({ isOpen = false, toggleSidebar }) => {
       />
 
       <div className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
+        {/* Sidebar Mini Header with Close Button */}
+        <div className="sidebar-mini-header">
+          <div className="sidebar-logo-text"><span>E</span>-Admin</div>
+          <div className="sidebar-close-btn-integrated" onClick={toggleSidebar}>
+            <FaTimes />
+          </div>
+        </div>
+
         {/* Profile */}
         <div className="admin-user-profile-card">
           <div className="admin-user-avatar">
